@@ -58,7 +58,7 @@ if (isset($_POST['register'])) {
                     <input type="password" name="password" class="form-control rounded-pill" placeholder="Password" required>
                 </div>
                 <p class="text-right">
-                    <a href="#" data-toggle="modal" data-target="#registerModal">Forgot password?</a>
+                    <a href="#" data-toggle="modal" data-target="#forgotPasswordModal">Forgot password?</a>
                 </p>
                 <button type="submit" name="login" class="btn btn-primary btn-block rounded-pill">Login</button>
                 <p class="text-center mt-3">
@@ -72,8 +72,8 @@ if (isset($_POST['register'])) {
     <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content registor">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
+                <div class="modal-header align-items-center">
+                    <h5 class="modal-title mx-auto" id="registerModalLabel">Register</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -92,14 +92,14 @@ if (isset($_POST['register'])) {
                             <label for="registerPassword" class="sr-only">Password</label>
                             <input type="password" name="password" id="registerPassword" class="form-control rounded-pill"  placeholder="Password" required>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group confirmPassword">
                             <label for="confirmPassword"  class="sr-only">Confirm Password</label>
                             <input type="password" name="confirm_password" id="confirmPassword" class="form-control rounded-pill"  placeholder="Confirm password" required>
                         </div>
                     </div>
                     <div class="modal-footer registor">
                         <button type="submit" name="register" class="btn btn-primary rounded-pill">Register</button>
-                        <p class="text-center mt-3">
+                        <p class="text-center">
                             <a href="#" data-dismiss="modal">Have an Account? Login Here</a>
                         </p>
                     </div>
@@ -107,6 +107,33 @@ if (isset($_POST['register'])) {
             </div>
         </div>
     </div>
+
+    <!-- Forgot Password Modal -->
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content forgot">
+            <div class="modal-header align-items-center">
+                <h5 class="modal-title mx-auto" id="forgotPasswordModalLabel">Forgot your password?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body px-4">
+                <p class="px-2">กรุณาใส่อีเมลที่คุณต้องการรีเซ็ตรหัสผ่าน</p>
+                <form id="forgotPasswordForm" method="POST" action="">
+                    <div class="form-group">
+                        <input type="email" name="email" class="form-control rounded-pill" placeholder="Enter email address" required>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-link" data-dismiss="modal">กลับไปหน้า Login</button>
+                        <button type="submit" class="btn btn-primary rounded-pill">Reset password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
     <!-- Bootstrap JS (สำหรับ modal) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

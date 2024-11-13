@@ -57,8 +57,6 @@ a:hover {
 .modal-footer.registor {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     padding: 1rem;
 }
 
@@ -66,9 +64,35 @@ a:hover {
     width: 70%;
 }
 
-.modal-footer.registor p {
-    margin: 0;
-    text-align: center;
+.modal-content.forgot {
+    border-radius: 1rem;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.modal-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem;
+    position: relative;
+}
 
+.modal-title {
+    margin: 0;
+    text-align: center;
+    flex: 1;
+}
+
+.modal-header .close {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0;
+    line-height: 1;
+}
+
+.form-group.confirmPassword {
+    margin-bottom: 0px;
+}
