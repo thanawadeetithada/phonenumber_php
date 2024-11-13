@@ -1,0 +1,75 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #F2F2F2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* text */
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: #000;
+}
+
+.text-right {
+    text-align: right;
+}
+
+/* card */
+.card {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+.card.login {
+    padding: 1.5rem;
+    border-radius: 1rem;
+    width: 40%;
+}
+
+/* modal */
+.modal-dialog {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.modal-content.registor {
+    width: 80%;
+    border-radius: 1rem;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.modal-footer.registor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-footer.registor button {
+    width: 70%;
+}
+
+.modal-footer.registor p {
+    margin: 0;
+    text-align: center;
+}
+
+
