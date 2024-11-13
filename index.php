@@ -100,7 +100,7 @@ if (isset($_POST['register'])) {
                     <div class="modal-footer registor">
                         <button type="submit" name="register" class="btn btn-primary rounded-pill">Register</button>
                         <p class="text-center mt-3">
-                            <a href="#" data-toggle="modal" data-target="#registerModal">Have an Account? Login Here</a>
+                            <a href="#" data-dismiss="modal">Have an Account? Login Here</a>
                         </p>
                     </div>
                 </form>
