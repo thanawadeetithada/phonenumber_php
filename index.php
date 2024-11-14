@@ -6,13 +6,19 @@ include 'config.php'; // เชื่อมต่อฐานข้อมูล
 if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
-    $query = "SELECT * FROM users WHERE email = '$email' LIMIT 1";
-    $result = mysqli_query($conn, $query);
-    $user = mysqli_fetch_assoc($result);
+
+    $query = "SELECT * FROM users_collection WHERE Email = ? LIMIT 1";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
 
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['isShowData'] = $user['isShowData'];
+        $_SESSION['isShowManagement'] = $user['isShowManagement'];
+
         header("Location: phone_number_management.php");
         exit;
     } else {
@@ -25,11 +31,45 @@ if (isset($_POST['register'])) {
     $name = $_POST['name'];
     $email = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $query = "INSERT INTO users (name, email, password, isShowData) VALUES ('$name', '$email', '$password', 0)";
-    if (mysqli_query($conn, $query)) {
-        echo "<script>alert('Registration successful! Please log in.');</script>";
+    $isShowData = 0;
+    $isShowManagement = 0;
+    $sql = "INSERT INTO users_collection (Name, Email, password, isShowManagement, isShowData) 
+            VALUES (?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sssii", $name, $email, $password, $isShowManagement, $isShowData);
+    if ($stmt->execute()) {
+        echo "<script>alert('Registration successful!');</script>";
     } else {
         echo "<script>alert('Error: Could not register.');</script>";
+    }
+}
+
+// ตรวจสอบว่าฟอร์มถูกส่งมาหรือไม่
+if (isset($_POST['register'])) {
+    // รับข้อมูลจากฟอร์ม
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    // ตรวจสอบรหัสผ่านว่าตรงกันหรือไม่
+    if ($password !== $confirm_password) {
+        echo "<script>alert('Passwords do not match');</script>";
+    } else {
+        // เข้ารหัสรหัสผ่านด้วย password_hash
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+        // บันทึกข้อมูลลงในฐานข้อมูล
+        $sql = "INSERT INTO users_collection (Name, Email, password, isShowManagement, isShowData) 
+                VALUES (?, ?, ?, 0, 0)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sss", $name, $email, $hashed_password);
+
+        if ($stmt->execute()) {
+            echo "<script>alert('Registration successful!');</script>";
+        } else {
+            echo "<script>alert('Error: Could not register');</script>";
+        }
     }
 }
 ?>
@@ -40,11 +80,10 @@ if (isset($_POST['register'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phone Number Management</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Bootstrap CSS (สำหรับ modal) -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container mt-5">
+    <div class="container">
         <div class="card login">
             <h2 class="title text-center">Login</h2>
             <?php if (isset($error)): ?>
