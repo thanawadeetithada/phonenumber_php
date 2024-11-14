@@ -1,5 +1,8 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 if (!isset($_SESSION['isShowData'])) {
     header("Location: login.php");
     exit();
@@ -7,6 +10,7 @@ if (!isset($_SESSION['isShowData'])) {
 $isShowData = $_SESSION['isShowData'];
 $isShowManagement = $_SESSION['isShowManagement'] ?? false;
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
