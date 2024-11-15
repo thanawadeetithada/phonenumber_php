@@ -1,22 +1,25 @@
 <?php
 include 'config.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $rowID = $_POST['RowID'];
-    $action = $_POST['Action'];
+    $rowID = $_POST['RowID'] ?? null;
+    $userID = $_POST['UserID'] ?? null;
+    $amount = $_POST['Amount'] ?? null;
+    $tag = $_POST['Tag'] ?? null;
+    $action = $_POST['Action'] ?? '';
 
     if ($action === 'DeleteCategory') {
-        $categoryID = $_POST['id'];
-    
+        $categoryID = $_POST['id'] ?? null;
+        
         if (!empty($categoryID) && is_numeric($categoryID)) {
             $stmt = $conn->prepare("DELETE FROM total_category WHERE id = ?");
             $stmt->bind_param('i', $categoryID);
-    
+
             if ($stmt->execute()) {
                 echo "Success";
             } else {
                 echo "Error";
             }
-    
+
             $stmt->close();
         } else {
             echo "Invalid ID";
@@ -25,40 +28,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    if ($action === 'ClearAmount') {
-        $stmt = $conn->prepare("UPDATE phonenumber SET amount = 0 WHERE id = ?");
-        $stmt->bind_param('i', $rowID);
-
-        if ($stmt->execute()) {
-            echo "Success";
+    if ($action === 'AddCategory') {
+        $categoryName = $_POST['category'] ?? '';
+    
+        if (!empty($categoryName)) {
+            $stmt = $conn->prepare("INSERT INTO total_category (category) VALUES (?)");
+            $stmt->bind_param('s', $categoryName);
+    
+            if ($stmt->execute()) {
+                echo "Success";
+                error_log("Insert Success");
+            } else {
+                echo "Error";
+            }
+    
+            $stmt->close();
         } else {
-            echo "Error: " . $conn->error;
+            echo "Invalid Category Name";
         }
-
-        $stmt->close();
         $conn->close();
         exit;
     }
-    if ($action === 'UpdateStatus') {
-        $status = $_POST['Status'];
+    
+    
+    if ($action === 'ClearAmount') {
+        if ($rowID !== null) {
+            $stmt = $conn->prepare("UPDATE phonenumber SET amount = 0 WHERE id = ?");
+            $stmt->bind_param('i', $rowID);
 
-        $stmt = $conn->prepare("UPDATE phonenumber SET status = ? WHERE id = ?");
-        $stmt->bind_param('ii', $status, $rowID);
+            if ($stmt->execute()) {
+                echo "Success";
+            } else {
+                echo "Error: " . $conn->error;
+            }
 
-        if ($stmt->execute()) {
-            echo "Success";
-        } else {
-            echo "Error: " . $conn->error;
+            $stmt->close();
         }
+        $conn->close();
+        exit;
+    }
 
-        $stmt->close();
+    if ($action === 'UpdateStatus') {
+        $status = $_POST['Status'] ?? null;
+
+        if ($status !== null && $rowID !== null) {
+            $stmt = $conn->prepare("UPDATE phonenumber SET status = ? WHERE id = ?");
+            $stmt->bind_param('ii', $status, $rowID);
+
+            if ($stmt->execute()) {
+                echo "Success";
+            } else {
+                echo "Error: " . $conn->error;
+            }
+
+            $stmt->close();
+        }
         $conn->close();
         exit;
     }
 
     if ($action === 'DeleteRow') {
-        $stmt = $conn->prepare("DELETE FROM phonenumber WHERE id = ?");
-        $stmt->bind_param('i', $rowID);
+        if ($rowID !== null) {
+            $stmt = $conn->prepare("DELETE FROM phonenumber WHERE id = ?");
+            $stmt->bind_param('i', $rowID);
+
+            if ($stmt->execute()) {
+                echo "Success";
+            } else {
+                echo "Error: " . $conn->error;
+            }
+
+            $stmt->close();
+        }
+        $conn->close();
+        exit;
+    }
+
+    if ($userID !== null && $amount !== null && $tag !== null && $rowID !== null) {
+        if (!is_numeric($amount)) {
+            $amount = '0';
+        }
+
+        error_log("RowID: $rowID, UserID: $userID, Amount: $amount, Tag: $tag");
+
+        $stmt = $conn->prepare("UPDATE phonenumber SET UserID = ?, amount = ?, tag = ? WHERE id = ?");
+        $stmt->bind_param('sssi', $userID, $amount, $tag, $rowID);
 
         if ($stmt->execute()) {
             echo "Success";
@@ -67,30 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $stmt->close();
-        $conn->close();
-        exit;
     }
-
-    $userID = $_POST['UserID'];
-    $amount = $_POST['Amount'];
-    $tag = $_POST['Tag'];
-
-    if (!is_numeric($amount)) {
-        $amount = '0';
-    }
-
-    error_log("RowID: $rowID, UserID: $userID, Amount: $amount, Tag: $tag");
-
-    $stmt = $conn->prepare("UPDATE phonenumber SET UserID = ?, amount = ?, tag = ? WHERE id = ?");
-    $stmt->bind_param('sssi', $userID, $amount, $tag, $rowID);
-
-    if ($stmt->execute()) {
-        echo "Success";
-    } else {
-        echo "Error: " . $conn->error;
-    }
-
-    $stmt->close();
     $conn->close();
     exit;
 }
@@ -104,6 +135,7 @@ if ($result) {
         $tags[] = $row['tag'];
     }
 }
+
 $queryCategories = "SELECT category FROM total_category";
 $resultCategories = $conn->query($queryCategories);
 $categories = [];
@@ -231,7 +263,7 @@ if ($result) {
                                 placeholder="Category Name" required>
                         </div>
                         <p class="existing-categories px-2">Existing Categories</p>
-                        <div class="existing-categories-list px-2">
+                        <div class="existing-categories-list px-2 mb-4">
                             <?php
 $query = "SELECT * FROM total_category";
 $result = $conn->query($query);
@@ -250,7 +282,7 @@ if ($result->num_rows > 0) {
 
                         </div>
                         <div class="d-flex justify-content-end">
-                            <button class="green-button">Add Category</button>
+                            <button class="green-button" onclick="addCategory()">Add Category</button>
                             <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         </div>
                     </form>
@@ -508,6 +540,30 @@ if ($result->num_rows > 0) {
         };
 
         xhr.send("id=" + categoryId + "&Action=DeleteCategory");
+    }
+
+    function addCategory() {
+        const categoryName = document.querySelector('input[name="category_name"]').value.trim();
+
+        if (categoryName === '') {
+            alert("กรุณากรอกชื่อ Category");
+            return;
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "phone_number_management.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onload = function() {
+        if (xhr.status === 200 && xhr.responseText.includes("Success")) {
+            alert("เพิ่ม Category สำเร็จแล้ว!");
+            location.reload();
+        } else {
+            alert("Failed to add category.");
+        }
+    };
+
+        xhr.send("Action=AddCategory&category=" + encodeURIComponent(categoryName));
     }
     </script>
 </body>
