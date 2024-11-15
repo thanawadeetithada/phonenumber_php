@@ -34,6 +34,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->close();
         exit;
     }
+
+    if ($action === 'DeleteRow') {
+        $stmt = $conn->prepare("DELETE FROM phonenumber WHERE id = ?");
+        $stmt->bind_param('i', $rowID);
+
+        if ($stmt->execute()) {
+            echo "Success";
+        } else {
+            echo "Error: " . $conn->error;
+        }
+
+        $stmt->close();
+        $conn->close();
+        exit;
+    }
+
     $userID = $_POST['UserID'];
     $amount = $_POST['Amount'];
     $tag = $_POST['Tag'];
@@ -347,6 +363,30 @@ if ($result) {
         };
         xhr.send(`RowID=${rowID}&Action=UpdateStatus&Status=${statusValue}`);
     }
+
+    function deleteRow(button) {
+    if (!confirm("ต้องการลบข้อมูลใช่ไหม?")) {
+        return;
+    }
+
+    const row = button.closest('tr');
+    const rowID = row.getAttribute('data-row-id');
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            alert('ทำการลบสำเร็จแล้ว!');
+            row.remove();
+        } else {
+            alert('ทำการลบไม่สำเร็จแล้ว!');
+        }
+    };
+
+    xhr.send(`RowID=${rowID}&Action=DeleteRow`);
+}
+
     </script>
 </body>
 
