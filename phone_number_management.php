@@ -1,6 +1,57 @@
 <?php
-include 'config.php'; // เพิ่มการเชื่อมต่อฐานข้อมูล
+include 'config.php';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $rowID = $_POST['RowID'];
+    $action = $_POST['Action'];
 
+    if ($action === 'ClearAmount') {
+        $stmt = $conn->prepare("UPDATE phonenumber SET amount = 0 WHERE id = ?");
+        $stmt->bind_param('i', $rowID);
+
+        if ($stmt->execute()) {
+            echo "Success";
+        } else {
+            echo "Error: " . $conn->error;
+        }
+
+        $stmt->close();
+        $conn->close();
+        exit;
+    }
+
+    $userID = $_POST['UserID'];
+    $amount = $_POST['Amount'];
+    $tag = $_POST['Tag'];
+
+    if (!is_numeric($amount)) {
+        $amount = '0';
+    }       
+
+    error_log("RowID: $rowID, UserID: $userID, Amount: $amount, Tag: $tag");
+
+    $stmt = $conn->prepare("UPDATE phonenumber SET UserID = ?, amount = ?, tag = ? WHERE id = ?");
+    $stmt->bind_param('sssi', $userID, $amount, $tag, $rowID);
+
+    if ($stmt->execute()) {
+        echo "Success";
+    } else {
+        echo "Error: " . $conn->error;
+    }
+
+    $stmt->close();
+    $conn->close();
+    exit;
+}
+
+$query = "SELECT * FROM total_tag";
+$result = $conn->query($query);
+
+$tags = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $tags[] = $row['tag'];
+    }
+}
 ?>
 
 
@@ -51,53 +102,189 @@ include 'config.php'; // เพิ่มการเชื่อมต่อฐ�
             </div>
 
             <div class="table-container">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>Phone Number</th>
-                <th>UserID</th>
-                <th>Category</th>
-                <th>Amount</th>
-                <th>Tag</th>
-                <th>Status</th>
-                <th>Edit</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php
-        $query = "SELECT phonenumber, UserID, category, amount, tag, status FROM phonenumber";
-        $result = $conn->query($query);
-
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                echo "<tr>";
-                echo "<td>" . htmlspecialchars($row['phonenumber']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['UserID']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['category']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['amount']) . "</td>";
-                echo "<td>" . htmlspecialchars($row['tag']) . "</td>";
-                echo "<td>" . ($row['status'] == 0 ? "Disable" : "Active") . "</td>";
-                echo "<td><button><i class='fas fa-pencil-alt'></i></button></td>";
-                echo "<td><button>Delete</button></td>";
-                echo "</tr>";
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Phone Number</th>
+                            <th>UserID</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Tag</th>
+                            <th>Status</th>
+                            <th>Edit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+       $query = "SELECT id, phonenumber, UserID, category, amount, tag, status FROM phonenumber";
+       $result = $conn->query($query);
+       
+       if ($result) {
+           while ($row = $result->fetch_assoc()) {
+            $amount = $row['amount'];
+            if (strpos($amount, '.') !== false && rtrim(substr($amount, strpos($amount, '.') + 1), '0') === '') {
+                $amount = (int) $amount;
             }
-        } else {
-            echo "<tr><td colspan='8'>No data available</td></tr>";
-        }
+               echo "<tr data-row-id='" . htmlspecialchars($row['id']) . "'>";
+               echo "<td>" . htmlspecialchars($row['phonenumber']) . "</td>";
+               echo "<td>" . htmlspecialchars($row['UserID']) . "</td>";
+               echo "<td>" . htmlspecialchars($row['category']) . "</td>";
+               echo "<td>" . htmlspecialchars($amount) . "</td>";
+               echo "<td>" . htmlspecialchars($row['tag']) . "</td>";
+               echo "<td>" . ($row['status'] == 0 ? "Disable" : "Active") . "</td>";
+               echo "<td><i class='fas fa-pencil-alt edit-icon' title='Edit' onclick='enableRowEdit(this)'></i></td>";
+               echo "<td>
+                       <button class='yellow-button' onclick='clearAmount(this)'>Clear Amount</button>
+                        <button class='red-button' onclick='toggleStatus(this, 0)'>Disable</button>
+                        <button class='green-button' onclick='toggleStatus(this, 1)'>Active</button>
+                        <button class='red-button' onclick='deleteRow(this)'>Delete</button>
+                    </td>";
+               echo "</tr>";
+           }
+       } else {
+           echo "<tr><td colspan='8'>No data available</td></tr>";
+       }
+       
         ?>
-    </tbody>
-    </table>
-</div>
+                    </tbody>
+                </table>
+            </div>
 
         </div>
     </div>
 
     <script>
+        
     function filterData() {
         const selectedCategory = document.getElementById('category-dropdown').value;
-        // Implement AJAX or redirection logic to fetch and display data based on the selected category
         console.log("Selected category:", selectedCategory);
+    }
+    
+    const tags = <?php echo json_encode($tags); ?>;
+
+    function enableRowEdit(editIcon) {
+        const row = editIcon.closest('tr');
+        const cells = row.querySelectorAll('td');
+
+        const allRows = document.querySelectorAll('.data-table tr');
+        allRows.forEach(otherRow => {
+            if (otherRow !== row) {
+                otherRow.classList.add('locked-row');
+            } else {
+                const actionButtons = otherRow.querySelectorAll('button');
+                actionButtons.forEach(button => button.classList.add('locked'));
+            }
+        });
+
+        const userIDInput = document.createElement('input');
+        userIDInput.type = 'text';
+        userIDInput.value = cells[1].innerText;
+        cells[1].innerHTML = '';
+        cells[1].appendChild(userIDInput);
+
+        const amountInput = document.createElement('input');
+        amountInput.type = 'number';
+        amountInput.value = cells[3].innerText;
+        amountInput.min = '0';
+        cells[3].innerHTML = '';
+        cells[3].appendChild(amountInput);
+
+        amountInput.addEventListener('input', function(event) {
+            let value = event.target.value;
+
+            const sanitizedValue = value.match(/^-?[0-9]*\.?[0-9]*$/);
+
+            if (!sanitizedValue) {
+                event.target.value = event.target.value.slice(0, -1);
+            }
+        });
+
+        const tagDropdown = document.createElement('select');
+        tags.forEach(tag => {
+            const option = document.createElement('option');
+            option.value = tag;
+            option.textContent = tag;
+            if (cells[4].innerText === tag) {
+                option.selected = true;
+            }
+            tagDropdown.appendChild(option);
+        });
+
+        cells[4].innerHTML = '';
+        cells[4].appendChild(tagDropdown);
+
+        editIcon.outerHTML = `<i class="fas fa-save save-icon" title="Save" onclick="saveRowEdit(this)"></i>`;
+    }
+
+
+    function saveRowEdit(saveIcon) {
+        const row = saveIcon.closest('tr');
+        const cells = row.querySelectorAll('td');
+
+        const userID = cells[1].querySelector('input').value;
+        let amount = cells[3].querySelector('input').value;
+        const tag = cells[4].querySelector('select').value;
+        const rowID = row.getAttribute('data-row-id');
+
+        amount = parseFloat(amount);
+
+        if (isNaN(amount)) {
+            amount = 0;
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                alert('Data updated successfully!');
+
+                cells[1].innerText = userID;
+                cells[3].innerText = formatAmount(amount);
+                cells[4].innerText = tag;
+                const allRows = document.querySelectorAll('.data-table tr');
+                allRows.forEach(otherRow => {
+                    const otherActionButtons = otherRow.querySelectorAll('button');
+                    otherActionButtons.forEach(button => button.classList.remove('locked')); // ปลดล็อกปุ่ม
+                    otherRow.classList.remove('locked-row');
+                });
+                saveIcon.outerHTML =
+                    `<i class="fas fa-pencil-alt edit-icon" title="Edit" onclick="enableRowEdit(this)"></i>`;
+                } else {
+                alert('Failed to update data!');
+            }
+        };
+
+        xhr.send(`RowID=${rowID}&UserID=${userID}&Amount=${amount}&Tag=${tag}`);
+    }
+
+    function formatAmount(amount) {
+        if (amount % 1 === 0) {
+            return parseInt(amount);
+        }
+        return parseFloat(amount);
+    }
+
+    function clearAmount(button) {
+        const row = button.closest('tr');
+        const cells = row.querySelectorAll('td');
+        const rowID = row.getAttribute('data-row-id');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                alert('Amount cleared successfully!');
+
+                cells[3].innerText = 0;
+            } else {
+                alert('Failed to clear amount!');
+            }
+        };
+
+        xhr.send(`RowID=${rowID}&Action=ClearAmount`);
     }
     </script>
 </body>

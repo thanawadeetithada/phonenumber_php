@@ -160,19 +160,19 @@ a:hover {
     color: #4caf50;
 }
 
-.card-button {
+/* .card-button {
     padding: 10px 20px;
     background-color: #4caf50;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .card-button:hover {
     background-color: #45a049;
-}
+} */
 
 .header-info {
     display: flex;
@@ -217,12 +217,33 @@ a:hover {
     border-radius: 8px;
     padding: 10px 20px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.green-button:hover {
-    background-color: #449C48;
+.red-button {
+    background-color: red;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.yellow-button {
+    background-color: #FDC00C;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .search-box {
@@ -250,7 +271,7 @@ a:hover {
     align-items: center;
 }
 
-select {
+#category-dropdown  {
     height: fit-content;
     border-radius: 5px;
     border: 0px;
@@ -282,5 +303,29 @@ select {
     font-weight: bold;
     font-size: 16px;
     padding: 20px;
+}
+
+.edit-icon {
+    cursor: pointer;
+    font-size: 16px;
+    color: #333; /* Customize the color */
+    padding: 0;
+    border: none;
+    background: none;
+    outline: none;
+}
+
+.edit-icon:hover {
+    color: #007bff; /* Change color on hover */
+}
+
+.locked-row {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+button.locked {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
