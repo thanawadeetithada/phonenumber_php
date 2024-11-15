@@ -18,7 +18,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->close();
         exit;
     }
+    if ($action === 'UpdateStatus') {
+        $status = $_POST['Status'];
+        
+        $stmt = $conn->prepare("UPDATE phonenumber SET status = ? WHERE id = ?");
+        $stmt->bind_param('ii', $status, $rowID);
 
+        if ($stmt->execute()) {
+            echo "Success";
+        } else {
+            echo "Error: " . $conn->error;
+        }
+
+        $stmt->close();
+        $conn->close();
+        exit;
+    }
     $userID = $_POST['UserID'];
     $amount = $_POST['Amount'];
     $tag = $_POST['Tag'];
@@ -155,38 +170,37 @@ if ($result) {
     </div>
 
     <script>
-        
     function filterData() {
         const selectedCategory = document.getElementById('category-dropdown').value;
         console.log("Selected category:", selectedCategory);
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-    updateActionButtons();
-});
-
-function updateActionButtons() {
-    const rows = document.querySelectorAll('.data-table tbody tr');
-    rows.forEach(row => {
-        const statusCell = row.querySelector('td:nth-child(6)');
-        const statusText = statusCell.innerText.trim();
-        const disableButton = row.querySelector('button.red-button');
-        const activeButton = row.querySelector('button.green-button');
-
-        disableButton.classList.remove('active', 'inactive');
-        activeButton.classList.remove('active', 'inactive');
-
-        if (statusText === '0' || statusText === 'Disable') {
-            disableButton.classList.add('disable');
-            activeButton.classList.add('inactive');
-        } else if (statusText === '1' || statusText === 'Active') {
-            disableButton.classList.add('inactive');
-            activeButton.classList.add('active');
-        }
+        updateActionButtons();
     });
-}
 
-    
+    function updateActionButtons() {
+        const rows = document.querySelectorAll('.data-table tbody tr');
+        rows.forEach(row => {
+            const statusCell = row.querySelector('td:nth-child(6)');
+            const statusText = statusCell.innerText.trim();
+            const disableButton = row.querySelector('button.red-button');
+            const activeButton = row.querySelector('button.green-button');
+
+            disableButton.classList.remove('active', 'inactive');
+            activeButton.classList.remove('active', 'inactive');
+
+            if (statusText === '0' || statusText === 'Disable') {
+                disableButton.classList.add('disable');
+                activeButton.classList.add('inactive');
+            } else if (statusText === '1' || statusText === 'Active') {
+                disableButton.classList.add('inactive');
+                activeButton.classList.add('active');
+            }
+        });
+    }
+
+
     const tags = <?php echo json_encode($tags); ?>;
 
     function enableRowEdit(editIcon) {
@@ -277,7 +291,7 @@ function updateActionButtons() {
                 });
                 saveIcon.outerHTML =
                     `<i class="fas fa-pencil-alt edit-icon" title="Edit" onclick="enableRowEdit(this)"></i>`;
-                } else {
+            } else {
                 alert('Failed to update data!');
             }
         };
@@ -311,6 +325,27 @@ function updateActionButtons() {
         };
 
         xhr.send(`RowID=${rowID}&Action=ClearAmount`);
+    }
+
+    function toggleStatus(button, statusValue) {
+        const row = button.closest('tr');
+        const rowID = row.getAttribute('data-row-id');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                alert('Status updated successfully!');
+                const statusCell = row.querySelector('td:nth-child(6)');
+                statusCell.innerText = statusValue === 1 ? "Active" : "Disable";
+
+                updateActionButtons();
+            } else {
+                alert('Failed to update status!');
+            }
+        };
+        xhr.send(`RowID=${rowID}&Action=UpdateStatus&Status=${statusValue}`);
     }
     </script>
 </body>
