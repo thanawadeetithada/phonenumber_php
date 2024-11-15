@@ -83,6 +83,14 @@ if ($result) {
         $tags[] = $row['tag'];
     }
 }
+$queryCategories = "SELECT category FROM total_category";
+$resultCategories = $conn->query($queryCategories);
+$categories = [];
+if ($resultCategories) {
+    while ($row = $resultCategories->fetch_assoc()) {
+        $categories[] = $row['category'];
+    }
+}
 ?>
 
 
@@ -116,7 +124,7 @@ if ($result) {
                 <div class="search-group">
                     <button class="green-button">Download</button>
                     <div class="search-box">
-                        <input type="text" placeholder="Search..." />
+                        <input type="text" placeholder="Search..." id="search-input" onkeyup="searchTable()" />
                         <i class="fas fa-search search-icon"></i>
                     </div>
                 </div>
@@ -188,9 +196,40 @@ if ($result) {
     <script>
     function filterData() {
         const selectedCategory = document.getElementById('category-dropdown').value;
-        console.log("Selected category:", selectedCategory);
+        const rows = document.querySelectorAll('.data-table tbody tr');
+
+        rows.forEach(row => {
+            const categoryCell = row.querySelector('td:nth-child(3)');
+            const category = categoryCell ? categoryCell.innerText.trim() : '';
+
+            if (selectedCategory === 'all' || category === selectedCategory) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     }
 
+    function searchTable() {
+        const input = document.getElementById('search-input');
+        const filter = input.value.toLowerCase();
+        const rows = document.querySelectorAll('.data-table tbody tr');
+
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            let match = false;
+
+            cells.forEach((cell, index) => {
+                if (index === cells.length - 1) return;
+
+                if (cell.innerText.toLowerCase().includes(filter)) {
+                    match = true;
+                }
+            });
+
+            row.style.display = match ? '' : 'none';
+        });
+    }
     document.addEventListener("DOMContentLoaded", () => {
         updateActionButtons();
     });
@@ -302,7 +341,7 @@ if ($result) {
                 const allRows = document.querySelectorAll('.data-table tr');
                 allRows.forEach(otherRow => {
                     const otherActionButtons = otherRow.querySelectorAll('button');
-                    otherActionButtons.forEach(button => button.classList.remove('locked')); // ปลดล็อกปุ่ม
+                    otherActionButtons.forEach(button => button.classList.remove('locked'));
                     otherRow.classList.remove('locked-row');
                 });
                 saveIcon.outerHTML =
@@ -365,28 +404,27 @@ if ($result) {
     }
 
     function deleteRow(button) {
-    if (!confirm("ต้องการลบข้อมูลใช่ไหม?")) {
-        return;
-    }
-
-    const row = button.closest('tr');
-    const rowID = row.getAttribute('data-row-id');
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', '', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            alert('ทำการลบสำเร็จแล้ว!');
-            row.remove();
-        } else {
-            alert('ทำการลบไม่สำเร็จแล้ว!');
+        if (!confirm("ต้องการลบข้อมูลใช่ไหม?")) {
+            return;
         }
-    };
 
-    xhr.send(`RowID=${rowID}&Action=DeleteRow`);
-}
+        const row = button.closest('tr');
+        const rowID = row.getAttribute('data-row-id');
 
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                alert('ทำการลบสำเร็จแล้ว!');
+                row.remove();
+            } else {
+                alert('ทำการลบไม่สำเร็จแล้ว!');
+            }
+        };
+
+        xhr.send(`RowID=${rowID}&Action=DeleteRow`);
+    }
     </script>
 </body>
 
