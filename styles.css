@@ -160,20 +160,6 @@ a:hover {
     color: #4caf50;
 }
 
-/* .card-button {
-    padding: 10px 20px;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.card-button:hover {
-    background-color: #45a049;
-} */
-
 .header-info {
     display: flex;
     justify-content: space-between;
@@ -210,8 +196,7 @@ a:hover {
     align-items: center;
 }
 
-.green-button {
-    background-color: #4CB050;
+button {
     color: white;
     border: none;
     border-radius: 8px;
@@ -220,30 +205,30 @@ a:hover {
     font-size: 12px;
     font-weight: bold;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.green-button {
+    background-color: #4CB050;
 }
 
 .red-button {
     background-color: red;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .yellow-button {
     background-color: #FDC00C;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 20px;
-    cursor: pointer;
-    font-size: 12px;
-    font-weight: bold;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+button.active {
+    background-color: #4CB050;
+}
+
+button.disable {
+    background-color: red;
+}
+
+button.inactive {
+    background-color: grey;
 }
 
 .search-box {
@@ -308,7 +293,7 @@ a:hover {
 .edit-icon {
     cursor: pointer;
     font-size: 16px;
-    color: #333; /* Customize the color */
+    color: #333;
     padding: 0;
     border: none;
     background: none;
@@ -316,7 +301,7 @@ a:hover {
 }
 
 .edit-icon:hover {
-    color: #007bff; /* Change color on hover */
+    color: #007bff;
 }
 
 .locked-row {

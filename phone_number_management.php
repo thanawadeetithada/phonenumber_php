@@ -160,6 +160,32 @@ if ($result) {
         const selectedCategory = document.getElementById('category-dropdown').value;
         console.log("Selected category:", selectedCategory);
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+    updateActionButtons();
+});
+
+function updateActionButtons() {
+    const rows = document.querySelectorAll('.data-table tbody tr');
+    rows.forEach(row => {
+        const statusCell = row.querySelector('td:nth-child(6)');
+        const statusText = statusCell.innerText.trim();
+        const disableButton = row.querySelector('button.red-button');
+        const activeButton = row.querySelector('button.green-button');
+
+        disableButton.classList.remove('active', 'inactive');
+        activeButton.classList.remove('active', 'inactive');
+
+        if (statusText === '0' || statusText === 'Disable') {
+            disableButton.classList.add('disable');
+            activeButton.classList.add('inactive');
+        } else if (statusText === '1' || statusText === 'Active') {
+            disableButton.classList.add('inactive');
+            activeButton.classList.add('active');
+        }
+    });
+}
+
     
     const tags = <?php echo json_encode($tags); ?>;
 
