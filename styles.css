@@ -280,19 +280,30 @@ button.inactive {
     padding: 15px 15px 15px 20px;
     text-align: left;
     border: none;
-    font-size: 14px;
+    font-size: 1rem;
+}
+
+td select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #aaaaaa;
+}
+
+td input {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #aaaaaa;
 }
 
 .data-table thead th {
     background-color: #f2f2f2;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 1rem;
     padding: 20px;
 }
 
 .edit-icon {
     cursor: pointer;
-    font-size: 16px;
     color: #333;
     padding: 0;
     border: none;
@@ -312,5 +323,9 @@ button.inactive {
 button.locked {
     cursor: not-allowed;
     opacity: 0.5;
+}
+
+select:focus {
+    outline: none;
 }
 

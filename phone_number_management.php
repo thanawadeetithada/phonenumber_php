@@ -333,7 +333,7 @@ if ($resultCategories) {
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                alert('Data updated successfully!');
+                alert('แก้ไขข้อมูลสำเร็จ!');
 
                 cells[1].innerText = userID;
                 cells[3].innerText = formatAmount(amount);
@@ -347,7 +347,7 @@ if ($resultCategories) {
                 saveIcon.outerHTML =
                     `<i class="fas fa-pencil-alt edit-icon" title="Edit" onclick="enableRowEdit(this)"></i>`;
             } else {
-                alert('Failed to update data!');
+                alert('แก้ไขข้อมูลไม่สำเร็จ!');
             }
         };
 
@@ -371,8 +371,6 @@ if ($resultCategories) {
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                alert('Amount cleared successfully!');
-
                 cells[3].innerText = 0;
             } else {
                 alert('Failed to clear amount!');
@@ -391,7 +389,6 @@ if ($resultCategories) {
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
             if (xhr.status === 200) {
-                alert('Status updated successfully!');
                 const statusCell = row.querySelector('td:nth-child(6)');
                 statusCell.innerText = statusValue === 1 ? "Active" : "Disable";
 
