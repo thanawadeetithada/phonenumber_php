@@ -131,28 +131,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $conn->close();
     exit;
-}
-
-$query = "SELECT * FROM total_tag";
-$result = $conn->query($query);
-
-$tags = [];
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $tags[] = $row['tag'];
     }
-}
 
-$queryCategories = "SELECT category FROM total_category";
-$resultCategories = $conn->query($queryCategories);
-$categories = [];
-if ($resultCategories) {
-    while ($row = $resultCategories->fetch_assoc()) {
-        $categories[] = $row['category'];
-    }
-}
+        $query = "SELECT * FROM total_tag";
+        $result = $conn->query($query);
+        $tags = [];
+        if ($result) {
+            while ($row = $result->fetch_assoc()) {
+                $tags[] = $row['tag'];
+            }
+        }
+
+        $queryCategories = "SELECT category FROM total_category";
+        $resultCategories = $conn->query($queryCategories);
+        $categories = [];
+        if ($resultCategories) {
+            while ($row = $resultCategories->fetch_assoc()) {
+                $categories[] = $row['category'];
+            }
+        }
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -219,36 +217,35 @@ if ($resultCategories) {
                     </thead>
                     <tbody>
                         <?php
-$query = "SELECT id, phonenumber, UserID, category, amount, tag, status FROM phonenumber";
-$result = $conn->query($query);
+                            $query = "SELECT id, phonenumber, UserID, category, amount, tag, status FROM phonenumber";
+                            $result = $conn->query($query);
 
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $amount = $row['amount'];
-        if (strpos($amount, '.') !== false && rtrim(substr($amount, strpos($amount, '.') + 1), '0') === '') {
-            $amount = (int) $amount;
-        }
-        echo "<tr data-row-id='" . htmlspecialchars($row['id']) . "'>";
-        echo "<td>" . htmlspecialchars($row['phonenumber']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['UserID']) . "</td>";
-        echo "<td>" . htmlspecialchars($row['category']) . "</td>";
-        echo "<td>" . htmlspecialchars($amount) . "</td>";
-        echo "<td>" . htmlspecialchars($row['tag']) . "</td>";
-        echo "<td>" . ($row['status'] == 0 ? "Disable" : "Active") . "</td>";
-        echo "<td><i class='fas fa-pencil-alt edit-icon' title='Edit' onclick='enableRowEdit(this)'></i></td>";
-        echo "<td>
-                       <button class='yellow-button' onclick='clearAmount(this)'>Clear Amount</button>
-                        <button class='red-button' onclick='toggleStatus(this, 0)'>Disable</button>
-                        <button class='green-button' onclick='toggleStatus(this, 1)'>Active</button>
-                        <button class='red-button' onclick='deleteRow(this)'>Delete</button>
-                    </td>";
-        echo "</tr>";
-    }
-} else {
-    echo "<tr><td colspan='8'>No data available</td></tr>";
-}
-
-?>
+                            if ($result) {
+                                while ($row = $result->fetch_assoc()) {
+                                    $amount = $row['amount'];
+                                    if (strpos($amount, '.') !== false && rtrim(substr($amount, strpos($amount, '.') + 1), '0') === '') {
+                                        $amount = (int) $amount;
+                                    }
+                                    echo "<tr data-row-id='" . htmlspecialchars($row['id']) . "'>";
+                                    echo "<td>" . htmlspecialchars($row['phonenumber']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['UserID']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['category']) . "</td>";
+                                    echo "<td>" . htmlspecialchars($amount) . "</td>";
+                                    echo "<td>" . htmlspecialchars($row['tag']) . "</td>";
+                                    echo "<td>" . ($row['status'] == 0 ? "Disable" : "Active") . "</td>";
+                                    echo "<td><i class='fas fa-pencil-alt edit-icon' title='Edit' onclick='enableRowEdit(this)'></i></td>";
+                                    echo "<td>
+                                                <button class='yellow-button' onclick='clearAmount(this)'>Clear Amount</button>
+                                                <button class='red-button' onclick='toggleStatus(this, 0)'>Disable</button>
+                                                <button class='green-button' onclick='toggleStatus(this, 1)'>Active</button>
+                                                <button class='red-button' onclick='deleteRow(this)'>Delete</button>
+                                          </td>";
+                                    echo "</tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='8'>No data available</td></tr>";
+                            }
+                        ?>
                     </tbody>
                 </table>
             </div>
@@ -272,21 +269,20 @@ if ($result) {
                         <p class="existing-categories px-2">Existing Categories</p>
                         <div class="existing-categories-list px-2 mb-4">
                             <?php
-$query = "SELECT * FROM total_category";
-$result = $conn->query($query);
+                                  $query = "SELECT * FROM total_category";
+                                  $result = $conn->query($query);
 
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        echo '<div class="d-flex justify-content-between align-items-center mb-2">';
-        echo '<span>' . htmlspecialchars($row['category']) . '</span>';
-        echo '<button type="button" class="red-button" onclick="deleteCategory(' . $row['id'] . ', this)">Delete</button>';
-        echo '</div>';
-    }
-} else {
-    echo '<p>No categories available.</p>';
-}
-?>
-
+                                  if ($result->num_rows > 0) {
+                                      while ($row = $result->fetch_assoc()) {
+                                          echo '<div class="d-flex justify-content-between align-items-center mb-2">';
+                                          echo '<span>' . htmlspecialchars($row['category']) . '</span>';
+                                          echo '<button type="button" class="red-button" onclick="deleteCategory(' . $row['id'] . ', this)">Delete</button>';
+                                          echo '</div>';
+                                      }
+                                  } else {
+                                      echo '<p>No categories available.</p>';
+                                  }
+                                  ?>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button class="green-button" onclick="addCategory()">Add Category</button>
