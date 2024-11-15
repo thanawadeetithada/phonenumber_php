@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($action === 'UpdateStatus') {
         $status = $_POST['Status'];
-        
+
         $stmt = $conn->prepare("UPDATE phonenumber SET status = ? WHERE id = ?");
         $stmt->bind_param('ii', $status, $rowID);
 
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!is_numeric($amount)) {
         $amount = '0';
-    }       
+    }
 
     error_log("RowID: $rowID, UserID: $userID, Amount: $amount, Tag: $tag");
 
@@ -135,7 +135,7 @@ if ($resultCategories) {
                 <select id="category-dropdown" onchange="filterData()">
                     <option value="all">All data</option>
                     <?php foreach ($categories as $category): ?>
-                    <option value="<?= htmlspecialchars($category) ?>"><?= htmlspecialchars($category) ?></option>
+                    <option value="<?= htmlspecialchars($category)?>"><?=htmlspecialchars($category)?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -156,36 +156,36 @@ if ($resultCategories) {
                     </thead>
                     <tbody>
                         <?php
-       $query = "SELECT id, phonenumber, UserID, category, amount, tag, status FROM phonenumber";
-       $result = $conn->query($query);
-       
-       if ($result) {
-           while ($row = $result->fetch_assoc()) {
-            $amount = $row['amount'];
-            if (strpos($amount, '.') !== false && rtrim(substr($amount, strpos($amount, '.') + 1), '0') === '') {
-                $amount = (int) $amount;
-            }
-               echo "<tr data-row-id='" . htmlspecialchars($row['id']) . "'>";
-               echo "<td>" . htmlspecialchars($row['phonenumber']) . "</td>";
-               echo "<td>" . htmlspecialchars($row['UserID']) . "</td>";
-               echo "<td>" . htmlspecialchars($row['category']) . "</td>";
-               echo "<td>" . htmlspecialchars($amount) . "</td>";
-               echo "<td>" . htmlspecialchars($row['tag']) . "</td>";
-               echo "<td>" . ($row['status'] == 0 ? "Disable" : "Active") . "</td>";
-               echo "<td><i class='fas fa-pencil-alt edit-icon' title='Edit' onclick='enableRowEdit(this)'></i></td>";
-               echo "<td>
+$query = "SELECT id, phonenumber, UserID, category, amount, tag, status FROM phonenumber";
+$result = $conn->query($query);
+
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $amount = $row['amount'];
+        if (strpos($amount, '.') !== false && rtrim(substr($amount, strpos($amount, '.') + 1), '0') === '') {
+            $amount = (int) $amount;
+        }
+        echo "<tr data-row-id='" . htmlspecialchars($row['id']) . "'>";
+        echo "<td>" . htmlspecialchars($row['phonenumber']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['UserID']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['category']) . "</td>";
+        echo "<td>" . htmlspecialchars($amount) . "</td>";
+        echo "<td>" . htmlspecialchars($row['tag']) . "</td>";
+        echo "<td>" . ($row['status'] == 0 ? "Disable" : "Active") . "</td>";
+        echo "<td><i class='fas fa-pencil-alt edit-icon' title='Edit' onclick='enableRowEdit(this)'></i></td>";
+        echo "<td>
                        <button class='yellow-button' onclick='clearAmount(this)'>Clear Amount</button>
                         <button class='red-button' onclick='toggleStatus(this, 0)'>Disable</button>
                         <button class='green-button' onclick='toggleStatus(this, 1)'>Active</button>
                         <button class='red-button' onclick='deleteRow(this)'>Delete</button>
                     </td>";
-               echo "</tr>";
-           }
-       } else {
-           echo "<tr><td colspan='8'>No data available</td></tr>";
-       }
-       
-        ?>
+        echo "</tr>";
+    }
+} else {
+    echo "<tr><td colspan='8'>No data available</td></tr>";
+}
+
+?>
                     </tbody>
                 </table>
             </div>
