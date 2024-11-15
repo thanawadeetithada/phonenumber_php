@@ -32,16 +32,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $categoryName = $_POST['category'] ?? '';
     
         if (!empty($categoryName)) {
-            $stmt = $conn->prepare("INSERT INTO total_category (category) VALUES (?)");
+            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM total_category WHERE category = ?");
             $stmt->bind_param('s', $categoryName);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
     
-            if ($stmt->execute()) {
-                echo "Success";
-                error_log("Insert Success");
+            if ($row['count'] > 0) {
+                echo "Duplicate";
             } else {
-                echo "Error";
-            }
+                $stmt = $conn->prepare("INSERT INTO total_category (category) VALUES (?)");
+                $stmt->bind_param('s', $categoryName);
     
+                if ($stmt->execute()) {
+                    echo "Success";
+                } else {
+                    echo "Error: " . $conn->error;
+                }
+            }
             $stmt->close();
         } else {
             echo "Invalid Category Name";
@@ -49,7 +57,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->close();
         exit;
     }
-    
     
     if ($action === 'ClearAmount') {
         if ($rowID !== null) {
@@ -555,13 +562,18 @@ if ($result->num_rows > 0) {
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
         xhr.onload = function() {
-        if (xhr.status === 200 && xhr.responseText.includes("Success")) {
-            alert("เพิ่ม Category สำเร็จแล้ว!");
-            location.reload();
-        } else {
-            alert("Failed to add category.");
-        }
-    };
+            if (xhr.status === 200) {
+                if (xhr.responseText.includes("Success")) {
+                    alert("เพิ่ม Category สำเร็จแล้ว!");
+                    location.reload();
+                } else if (xhr.responseText.includes("Duplicate")) {
+                    alert("Category นี้มีอยู่แล้ว ไม่สามารถเพิ่มซ้ำได้");
+                    location.reload();
+                } else {
+                    alert("Failed to add category.");
+                }
+            }
+        };
 
         xhr.send("Action=AddCategory&category=" + encodeURIComponent(categoryName));
     }
