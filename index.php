@@ -150,7 +150,7 @@ if (isset($_POST['register'])) {
     <!-- Forgot Password Modal -->
 <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content forgot">
+        <div class="modal-content modal">
             <div class="modal-header align-items-center">
                 <h5 class="modal-title mx-auto" id="forgotPasswordModalLabel">Forgot your password?</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">

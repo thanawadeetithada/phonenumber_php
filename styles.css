@@ -61,7 +61,7 @@ a:hover {
     width: 70%;
 }
 
-.modal-content.forgot {
+.modal-content.modal {
     border-radius: 1rem;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -182,7 +182,8 @@ a:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 20px 0;
+    margin-top: 25px;
+    margin-bottom: 20px;
 }
 
 .button-group {
@@ -200,35 +201,40 @@ button {
     color: white;
     border: none;
     border-radius: 8px;
-    padding: 10px 20px;
+    padding: 8px 20px;
     cursor: pointer;
     font-size: 12px;
     font-weight: bold;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .green-button {
     background-color: #4CB050;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .red-button {
     background-color: red;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .yellow-button {
     background-color: #FDC00C;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 button.active {
     background-color: #4CB050;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 button.disable {
     background-color: red;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 button.inactive {
     background-color: grey;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .search-box {
@@ -266,7 +272,7 @@ button.inactive {
 }
 
 .table-container {
-    margin: 10px auto;
+    margin-top: 10px;
 }
 
 .data-table {
@@ -329,3 +335,42 @@ select:focus {
     outline: none;
 }
 
+.centered-container h1 {
+    color: #4caf50;
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 25px;
+    margin-top: 20px;
+}
+
+h2 {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+h3 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 0px;
+}
+
+button.close {
+    background: none;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    transition: none;
+}
+
+*:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.existing-categories {
+    font-weight: bold;
+}
+
+h5 {
+    font-weight: bold;
+}

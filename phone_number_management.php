@@ -4,6 +4,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rowID = $_POST['RowID'];
     $action = $_POST['Action'];
 
+    if ($action === 'DeleteCategory') {
+        $categoryID = $_POST['id'];
+    
+        if (!empty($categoryID) && is_numeric($categoryID)) {
+            $stmt = $conn->prepare("DELETE FROM total_category WHERE id = ?");
+            $stmt->bind_param('i', $categoryID);
+    
+            if ($stmt->execute()) {
+                echo "Success";
+            } else {
+                echo "Error";
+            }
+    
+            $stmt->close();
+        } else {
+            echo "Invalid ID";
+        }
+        $conn->close();
+        exit;
+    }
+
     if ($action === 'ClearAmount') {
         $stmt = $conn->prepare("UPDATE phonenumber SET amount = 0 WHERE id = ?");
         $stmt->bind_param('i', $rowID);
@@ -100,8 +121,10 @@ if ($resultCategories) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Number Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="styles.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -117,7 +140,8 @@ if ($resultCategories) {
 
             <div class="button-search-container">
                 <div class="button-group">
-                    <button class="green-button">Add New Category</button>
+                    <button class="green-button" data-toggle="modal" data-target="#addcategoryModal">Add New
+                        Category</button>
                     <button class="green-button">Add New Tag</button>
                     <button class="green-button">Add Phone Number</button>
                 </div>
@@ -135,8 +159,8 @@ if ($resultCategories) {
                 <select id="category-dropdown" onchange="filterData()">
                     <option value="all">All data</option>
                     <?php foreach ($categories as $category): ?>
-                    <option value="<?= htmlspecialchars($category)?>"><?=htmlspecialchars($category)?></option>
-                    <?php endforeach; ?>
+                    <option value="<?=htmlspecialchars($category)?>"><?=htmlspecialchars($category)?></option>
+                    <?php endforeach;?>
                 </select>
             </div>
 
@@ -193,6 +217,50 @@ if ($result) {
         </div>
     </div>
 
+    <div class="modal fade" id="addcategoryModal" tabindex="-1" role="dialog" aria-labelledby="addcategoryModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content modal">
+                <div class="modal-header">
+                    <h5 class="modal-title mx-auto" id="addcategoryModalLabel">Add New Category</h5>
+                </div>
+                <div class="modal-body px-4">
+                    <form id="forgotPasswordForm" method="POST" action="">
+                        <div class="form-group">
+                            <input type="text" name="category_name" class="form-control rounded-pill"
+                                placeholder="Category Name" required>
+                        </div>
+                        <p class="existing-categories px-2">Existing Categories</p>
+                        <div class="existing-categories-list px-2">
+                            <?php
+$query = "SELECT * FROM total_category";
+$result = $conn->query($query);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo '<div class="d-flex justify-content-between align-items-center mb-2">';
+        echo '<span>' . htmlspecialchars($row['category']) . '</span>';
+        echo '<button type="button" class="red-button" onclick="deleteCategory(' . $row['id'] . ', this)">Delete</button>';
+        echo '</div>';
+    }
+} else {
+    echo '<p>No categories available.</p>';
+}
+?>
+
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="green-button">Add Category</button>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
     function filterData() {
         const selectedCategory = document.getElementById('category-dropdown').value;
@@ -421,6 +489,25 @@ if ($result) {
         };
 
         xhr.send(`RowID=${rowID}&Action=DeleteRow`);
+    }
+
+    function deleteCategory(categoryId, button) {
+        if (!confirm("ต้องการลบ Category ใช่ไหม?")) return;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "phone_number_management.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onload = function() {
+            if (xhr.status === 200 && xhr.responseText.includes("Success")) {
+                const categoryElement = button.closest('.d-flex');
+                categoryElement.remove();
+                alert("ลบ Category สำเร็จแล้ว!");
+            } else {
+                alert("Failed to delete category.");
+            }
+        };
+
+        xhr.send("id=" + categoryId + "&Action=DeleteCategory");
     }
     </script>
 </body>
