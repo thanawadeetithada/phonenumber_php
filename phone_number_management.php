@@ -354,7 +354,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="text" name="category_name" class="form-control rounded-pill"
                                 placeholder="Category Name" required>
                         </div>
-                        <p class="existing-categories px-2">Existing Categories</p>
+                        <p class="existing-categories px-2 mb-2">Existing Categories</p>
                         <div class="existing-categories-list px-2 mb-4">
                             <?php
                                   $query = "SELECT * FROM total_category";
@@ -368,7 +368,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                           echo '</div>';
                                       }
                                   } else {
-                                      echo '<p>No categories available.</p>';
+                                      echo '<p style = "color: red;">No categories available.</p>';
                                   }
                                   ?>
                         </div>
@@ -395,7 +395,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="text" name="tag_name" class="form-control rounded-pill" placeholder="Tag Name"
                                 required>
                         </div>
-                        <p class="existing-categories px-2">Existing Tags</p>
+                        <p class="existing-categories px-2 mb-2">Existing Tags</p>
                         <div class="existing-categories-list px-2 mb-4">
                             <?php
                                   $query = "SELECT * FROM total_tag";
@@ -409,7 +409,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                           echo '</div>';
                                       }
                                   } else {
-                                      echo '<p>No tag available.</p>';
+                                      echo '<p style = "color: red;">No tag available.</p>';
                                   }
                                   ?>
                         </div>
