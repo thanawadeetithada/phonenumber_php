@@ -7,6 +7,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tag = $_POST['Tag'] ?? null;
     $action = $_POST['Action'] ?? '';
 
+    if ($action === 'DeleteTag') {
+        $tagID = $_POST['id'] ?? null;
+        
+        if (!empty($tagID) && is_numeric($tagID)) {
+            $stmt = $conn->prepare("DELETE FROM total_tag WHERE id = ?");
+            $stmt->bind_param('i', $tagID);
+
+            if ($stmt->execute()) {
+                echo "Success";
+            } else {
+                echo "Error";
+            }
+
+            $stmt->close();
+        } else {
+            echo "Invalid ID";
+        }
+        $conn->close();
+        exit;
+    }
+
+    if ($action === 'AddTag') {
+        $tagName = $_POST['tag'] ?? '';
+        
+        if (!empty($tagName)) {
+            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM total_tag WHERE tag = ?");
+            $stmt->bind_param('s', $tagName);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+    
+            if ($row['count'] > 0) {
+                echo "Duplicate";
+            } else {
+                $stmt = $conn->prepare("INSERT INTO total_tag (tag) VALUES (?)");
+                $stmt->bind_param('s', $tagName);
+    
+                if ($stmt->execute()) {
+                    echo "Success:" . $conn->insert_id;
+                } else {
+                    echo "Error: " . $conn->error;
+                }
+            }
+            $stmt->close();
+        } else {
+            echo "Invalid Tag Name";
+        }
+        $conn->close();
+        exit;
+    }
+    
+
     if ($action === 'DeleteCategory') {
         $categoryID = $_POST['id'] ?? null;
         
@@ -179,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="button-group">
                     <button class="green-button" data-toggle="modal" data-target="#addcategoryModal">Add New
                         Category</button>
-                    <button class="green-button">Add New Tag</button>
+                    <button class="green-button" data-toggle="modal" data-target="#addtagModal">Add New Tag</button>
                     <button class="green-button">Add Phone Number</button>
                 </div>
                 <div class="search-group">
@@ -286,6 +338,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="d-flex justify-content-end">
                             <button class="green-button" onclick="addCategory()">Add Category</button>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addtagModal" tabindex="-1" role="dialog" aria-labelledby="addtagModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content modal">
+                <div class="modal-header">
+                    <h5 class="modal-title mx-auto" id="addtagModalLabel">Add New Tag</h5>
+                </div>
+                <div class="modal-body px-4">
+                    <form id="forgotPasswordForm" method="POST" action="">
+                        <div class="form-group">
+                            <input type="text" name="tag_name" class="form-control rounded-pill" placeholder="Tag Name"
+                                required>
+                        </div>
+                        <p class="existing-categories px-2">Existing Tags</p>
+                        <div class="existing-categories-list px-2 mb-4">
+                            <?php
+                                  $query = "SELECT * FROM total_tag";
+                                  $result = $conn->query($query);
+
+                                  if ($result->num_rows > 0) {
+                                      while ($row = $result->fetch_assoc()) {
+                                          echo '<div class="d-flex justify-content-between align-items-center mb-2">';
+                                          echo '<span>' . htmlspecialchars($row['tag']) . '</span>';
+                                          echo '<button type="button" class="red-button" onclick="deleteTag(' . $row['id'] . ', this)">Delete</button>';
+                                          echo '</div>';
+                                      }
+                                  } else {
+                                      echo '<p>No tag available.</p>';
+                                  }
+                                  ?>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="green-button" onclick="addTag()">Add Tag</button>
                             <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         </div>
                     </form>
@@ -572,6 +665,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         };
 
         xhr.send("Action=AddCategory&category=" + encodeURIComponent(categoryName));
+    }
+
+    function deleteTag(tagId, button) {
+        if (!confirm("ต้องการลบ Tag ใช่ไหม?")) return;
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "phone_number_management.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onload = function() {
+            if (xhr.status === 200 && xhr.responseText.includes("Success")) {
+                const categoryElement = button.closest('.d-flex');
+                categoryElement.remove();
+                alert("ลบ Tag สำเร็จแล้ว!");
+            } else {
+                alert("Failed to delete Tag.");
+            }
+        };
+
+        xhr.send("id=" + tagId + "&Action=DeleteTag");
+    }
+
+    function addTag() {
+        const tagName = document.querySelector('input[name="tag_name"]').value.trim();
+
+        if (tagName === '') {
+            alert("กรุณากรอกชื่อ Tag");
+            return;
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "phone_number_management.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                if (xhr.responseText.includes("Success")) {
+                    alert("เพิ่ม Tag สำเร็จแล้ว!");
+                    location.reload();
+                } else if (xhr.responseText.includes("Duplicate")) {
+                    alert("Tag นี้มีอยู่แล้ว ไม่สามารถเพิ่มซ้ำได้");
+                    location.reload();
+                } else {
+                    alert("Failed to add Tag.");
+                }
+            }
+        };
+        xhr.send("Action=AddTag&tag=" + encodeURIComponent(tagName));
     }
     </script>
 </body>
