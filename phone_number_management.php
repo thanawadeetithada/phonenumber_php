@@ -7,6 +7,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tag = $_POST['Tag'] ?? null;
     $action = $_POST['Action'] ?? '';
 
+   if ($action === 'AddPhoneNumber') {
+    $phoneNumber = $_POST['phonenumber'] ?? '';
+    $category = $_POST['category'] ?? '';
+
+    if (!empty($phoneNumber) && !empty($category)) {
+        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM phonenumber WHERE phonenumber = ?");
+        $stmt->bind_param('s', $phoneNumber);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        if ($row['count'] > 0) {
+            echo "Duplicate";
+        } else {
+            $userID = "";
+            $amount = 0;
+            $status = 1;
+            $tag = "";
+
+            $stmt = $conn->prepare("INSERT INTO phonenumber (phonenumber, UserID, amount, category, status, tag) VALUES (?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param('ssdsss', $phoneNumber, $userID, $amount, $category, $status, $tag);
+
+            if ($stmt->execute()) {
+                echo "Success";
+            } else {
+                error_log("SQL Error: " . $stmt->error);
+                echo "Error: " . $conn->error;
+            }
+        }
+        $stmt->close();
+    } else {
+        echo "Invalid Input";
+    }
+    $conn->close();
+    exit;
+}
+
     if ($action === 'DeleteTag') {
         $tagID = $_POST['id'] ?? null;
         
@@ -231,7 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <button class="green-button" data-toggle="modal" data-target="#addcategoryModal">Add New
                         Category</button>
                     <button class="green-button" data-toggle="modal" data-target="#addtagModal">Add New Tag</button>
-                    <button class="green-button">Add Phone Number</button>
+                    <button class="green-button" data-toggle="modal" data-target="#addphoneModal">Add Phone Number</button>
                 </div>
                 <div class="search-group">
                     <button class="green-button">Download</button>
@@ -378,6 +415,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         <div class="d-flex justify-content-end">
                             <button class="green-button" onclick="addTag()">Add Tag</button>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addphoneModal" tabindex="-1" role="dialog" aria-labelledby="addphoneModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content modal">
+                <div class="modal-header">
+                    <h5 class="modal-title mx-auto" id="addphoneModalLabel">Add Phone Numbers</h5>
+                </div>
+                <div class="modal-body px-4">
+                    <form id="forgotPasswordForm" method="POST" action="">
+                    <input type="text" name="phone_number" class="form-control rounded-pill mb-2"
+                    placeholder="Phone Number" required>
+                        <div class="dropdown-container">
+                            <p class="label-category-add-phone" for="category-dropdown-add-phone" style="margin: 8px">
+                                Select Category
+                            </p>
+                            <select id="category-dropdown-add-phone">
+                                <?php foreach ($categories as $category): ?>
+                                <option value="<?=htmlspecialchars($category)?>"><?=htmlspecialchars($category)?>
+                                </option>
+                                <?php endforeach;?>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button class="green-button" onclick="addPhoneNumber()">Add Phone Number</button>
                             <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         </div>
                     </form>
@@ -711,6 +780,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         };
         xhr.send("Action=AddTag&tag=" + encodeURIComponent(tagName));
+    }
+
+    function addPhoneNumber() {
+        const phoneNumber = document.querySelector('input[name="phone_number"]').value.trim();
+        const categoryDropdown = document.querySelector('#category-dropdown-add-phone');
+        const category = categoryDropdown ? categoryDropdown.value : '';
+
+        if (!phoneNumber || !category) {
+            alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+            return;
+        }
+
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", "phone_number_management.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                console.log(xhr.responseText);
+                if (xhr.responseText.includes("Success")) {
+                    alert("เพิ่มเบอร์โทรสำเร็จ!");
+                    location.reload();
+                } else if (xhr.responseText.includes("Duplicate")) {
+                    alert("เบอร์โทรนี้มีอยู่ในระบบแล้ว");
+                } else {
+                    alert("ไม่สามารถเพิ่มเบอร์โทรได้");
+                }
+            } else {
+                console.error("Request failed:", xhr.status, xhr.statusText);
+            }
+        };
+
+        const data =
+            `Action=AddPhoneNumber&phonenumber=${encodeURIComponent(phoneNumber)}&category=${encodeURIComponent(category)}`;
+        console.log(data);
+        xhr.send(data);
     }
     </script>
 </body>

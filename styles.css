@@ -128,7 +128,7 @@ a:hover {
 }
 
 .tab-menu li a:hover {
-    color: #ffd700;
+    color: grey;
 }
 
 /* phoneNumber */
@@ -373,4 +373,14 @@ button.close {
 
 h5 {
     font-weight: bold;
+}
+
+#category-dropdown-add-phone {
+    border: 1px solid #ddd;
+    height: fit-content;
+    border-radius: 5px;
+    padding: 2px;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    color: #212529;
 }
