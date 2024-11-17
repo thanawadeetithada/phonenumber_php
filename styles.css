@@ -384,3 +384,7 @@ h5 {
     font-family: Arial, sans-serif;
     color: #212529;
 }
+
+.row-disabled {
+    background-color: #f8d7da;
+}

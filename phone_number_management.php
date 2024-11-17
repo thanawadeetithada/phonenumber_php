@@ -268,7 +268,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <button class="green-button" data-toggle="modal" data-target="#addcategoryModal">Add New
                         Category</button>
                     <button class="green-button" data-toggle="modal" data-target="#addtagModal">Add New Tag</button>
-                    <button class="green-button" data-toggle="modal" data-target="#addphoneModal">Add Phone Number</button>
+                    <button class="green-button" data-toggle="modal" data-target="#addphoneModal">Add Phone
+                        Number</button>
                 </div>
                 <div class="search-group">
                     <button class="green-button">Download</button>
@@ -432,8 +433,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="modal-body px-4">
                     <form id="forgotPasswordForm" method="POST" action="">
-                    <input type="text" name="phone_number" class="form-control rounded-pill mb-2"
-                    placeholder="Phone Number" required>
+                        <input type="text" name="phone_number" class="form-control rounded-pill mb-2"
+                            placeholder="Phone Number" required>
                         <div class="dropdown-container">
                             <p class="label-category-add-phone" for="category-dropdown-add-phone" style="margin: 8px">
                                 Select Category
@@ -506,10 +507,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const disableButton = row.querySelector('button.red-button');
             const activeButton = row.querySelector('button.green-button');
 
+            row.classList.remove('row-disabled');
             disableButton.classList.remove('active', 'inactive');
             activeButton.classList.remove('active', 'inactive');
 
             if (statusText === '0' || statusText === 'Disable') {
+                row.classList.add('row-disabled');
                 disableButton.classList.add('disable');
                 activeButton.classList.add('inactive');
             } else if (statusText === '1' || statusText === 'Active') {
@@ -519,6 +522,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     }
 
+    document.addEventListener("DOMContentLoaded", () => {
+        updateActionButtons();
+    });
 
     const tags = <?php echo json_encode($tags); ?>;
 
@@ -783,49 +789,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function addPhoneNumber() {
-    const phoneNumberInput = document.querySelector('input[name="phone_number"]').value.trim();
-    const categoryDropdown = document.querySelector('#category-dropdown-add-phone');
-    const category = categoryDropdown ? categoryDropdown.value : '';
+        const phoneNumberInput = document.querySelector('input[name="phone_number"]').value.trim();
+        const categoryDropdown = document.querySelector('#category-dropdown-add-phone');
+        const category = categoryDropdown ? categoryDropdown.value : '';
 
-    if (!phoneNumberInput || !category) {
-        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-        return;
-    }
-    const phoneNumbers = phoneNumberInput.split(/[\s,]+/).filter(num => num);
+        if (!phoneNumberInput || !category) {
+            alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+            return;
+        }
+        const phoneNumbers = phoneNumberInput.split(/[\s,]+/).filter(num => num);
 
-    if (phoneNumbers.length === 0) {
-        alert("กรุณากรอกเบอร์โทรศัพท์ที่ถูกต้อง");
-        return;
-    }
-    phoneNumbers.forEach(phoneNumber => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "phone_number_management.php", true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        if (phoneNumbers.length === 0) {
+            alert("กรุณากรอกเบอร์โทรศัพท์ที่ถูกต้อง");
+            return;
+        }
+        phoneNumbers.forEach(phoneNumber => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "phone_number_management.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                console.log(xhr.responseText);
-                if (xhr.responseText.includes("Success")) {
-                    alert(`เบอร์โทร ${phoneNumber} เพิ่มสำเร็จ!`);
-                    location.reload();
-                } else if (xhr.responseText.includes("Duplicate")) {
-                    alert(`เบอร์โทร ${phoneNumber} มีอยู่ในระบบแล้ว`);
-                    location.reload();
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                    if (xhr.responseText.includes("Success")) {
+                        alert(`เบอร์โทร ${phoneNumber} เพิ่มสำเร็จ!`);
+                        location.reload();
+                    } else if (xhr.responseText.includes("Duplicate")) {
+                        alert(`เบอร์โทร ${phoneNumber} มีอยู่ในระบบแล้ว`);
+                        location.reload();
+                    } else {
+                        alert(`ไม่สามารถเพิ่มเบอร์โทร ${phoneNumber} ได้`);
+                        location.reload();
+                    }
                 } else {
-                    alert(`ไม่สามารถเพิ่มเบอร์โทร ${phoneNumber} ได้`);
-                    location.reload();
+                    console.error("Request failed:", xhr.status, xhr.statusText);
                 }
-            } else {
-                console.error("Request failed:", xhr.status, xhr.statusText);
-            }
-        };
+            };
 
-        const data = 
-            `Action=AddPhoneNumber&phonenumber=${encodeURIComponent(phoneNumber)}&category=${encodeURIComponent(category)}`;
-        console.log(data);
-        xhr.send(data);
-    });
-}
+            const data =
+                `Action=AddPhoneNumber&phonenumber=${encodeURIComponent(phoneNumber)}&category=${encodeURIComponent(category)}`;
+            console.log(data);
+            xhr.send(data);
+        });
+    }
     </script>
 </body>
 
