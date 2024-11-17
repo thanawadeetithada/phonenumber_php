@@ -783,40 +783,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function addPhoneNumber() {
-        const phoneNumber = document.querySelector('input[name="phone_number"]').value.trim();
-        const categoryDropdown = document.querySelector('#category-dropdown-add-phone');
-        const category = categoryDropdown ? categoryDropdown.value : '';
+    const phoneNumberInput = document.querySelector('input[name="phone_number"]').value.trim();
+    const categoryDropdown = document.querySelector('#category-dropdown-add-phone');
+    const category = categoryDropdown ? categoryDropdown.value : '';
 
-        if (!phoneNumber || !category) {
-            alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-            return;
-        }
+    if (!phoneNumberInput || !category) {
+        alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        return;
+    }
+    const phoneNumbers = phoneNumberInput.split(/[\s,]+/).filter(num => num);
 
+    if (phoneNumbers.length === 0) {
+        alert("กรุณากรอกเบอร์โทรศัพท์ที่ถูกต้อง");
+        return;
+    }
+    phoneNumbers.forEach(phoneNumber => {
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "phone_number_management.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-        xhr.onload = function() {
+        xhr.onload = function () {
             if (xhr.status === 200) {
                 console.log(xhr.responseText);
                 if (xhr.responseText.includes("Success")) {
-                    alert("เพิ่มเบอร์โทรสำเร็จ!");
+                    alert(`เบอร์โทร ${phoneNumber} เพิ่มสำเร็จ!`);
                     location.reload();
                 } else if (xhr.responseText.includes("Duplicate")) {
-                    alert("เบอร์โทรนี้มีอยู่ในระบบแล้ว");
+                    alert(`เบอร์โทร ${phoneNumber} มีอยู่ในระบบแล้ว`);
+                    location.reload();
                 } else {
-                    alert("ไม่สามารถเพิ่มเบอร์โทรได้");
+                    alert(`ไม่สามารถเพิ่มเบอร์โทร ${phoneNumber} ได้`);
+                    location.reload();
                 }
             } else {
                 console.error("Request failed:", xhr.status, xhr.statusText);
             }
         };
 
-        const data =
+        const data = 
             `Action=AddPhoneNumber&phonenumber=${encodeURIComponent(phoneNumber)}&category=${encodeURIComponent(category)}`;
         console.log(data);
         xhr.send(data);
-    }
+    });
+}
     </script>
 </body>
 
