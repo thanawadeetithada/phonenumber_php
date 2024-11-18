@@ -103,6 +103,37 @@ a:hover {
 }
 
 /* header */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: -100%;
+    transform: translateX(-50%);
+    min-width: 160px;
+    padding: 10px;
+    z-index: 1;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+}
+
+.dropdown-menu a {
+    color: black !important;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block;
+    font-size: 18px !important;
+}
+
+.dropdown.active .dropdown-menu {
+    display: block;
+    width: max-content;
+}
+
 .tab-bar {
     background-color:#9E9E9E;
     padding: 1rem 2rem;
