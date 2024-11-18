@@ -27,13 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetchData'])) {
     if ($resultInactiveCount) {
         $row = $resultInactiveCount->fetch_assoc();
         $inactiveCount = $row['inactiveCount'];
-    }    
+    }
 
     header('Content-Type: application/json');
     echo json_encode([
         'data' => $data,
         'totalRows' => $totalRows,
-        'inactiveCount' => $inactiveCount, // ส่งค่ากลับมา
+        'inactiveCount' => $inactiveCount,
         'totalPages' => $totalPages,
         'currentPage' => $currentPage,
     ]);
@@ -300,8 +300,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card">
             <h1>Phone Number Management</h1>
             <div class="header-info">
-                <h2 class="show-member">สมาชิกทั้งหมด :</h2>
-                <h2 class="user-close">ปิดการใช้งาน : <?php echo $inactiveCount; ?> คน</h2>
+                <h2 class="show-member"></h2>
+                <h2 class="user-close"></h2>
                 <h2 class="total-amount">ยอดเงินรวม :</h2>
             </div>
 
@@ -928,6 +928,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .then(response => response.json())
             .then(data => {
                 totalPages = data.totalPages;
+                const showMemberElement = document.querySelector('.show-member');
+                showMemberElement.innerText = `สมาชิกทั้งหมด : ${data.totalRows} คน`;
+
                 renderTable(data.data);
                 const userCloseElement = document.querySelector('.user-close');
                 userCloseElement.innerText = `ปิดการใช้งาน : ${data.inactiveCount} คน`;
