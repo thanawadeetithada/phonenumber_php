@@ -20,10 +20,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetchData'])) {
 
     $totalPages = ceil($totalRows / $rowsPerPage);
 
+    $queryInactiveCount = "SELECT COUNT(*) as inactiveCount FROM phonenumber WHERE status = 0";
+    $resultInactiveCount = $conn->query($queryInactiveCount);
+
+    $inactiveCount = 0;
+    if ($resultInactiveCount) {
+        $row = $resultInactiveCount->fetch_assoc();
+        $inactiveCount = $row['inactiveCount'];
+    }    
+
     header('Content-Type: application/json');
     echo json_encode([
         'data' => $data,
         'totalRows' => $totalRows,
+        'inactiveCount' => $inactiveCount, // ส่งค่ากลับมา
         'totalPages' => $totalPages,
         'currentPage' => $currentPage,
     ]);
@@ -291,7 +301,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h1>Phone Number Management</h1>
             <div class="header-info">
                 <h2 class="show-member">สมาชิกทั้งหมด :</h2>
-                <h2 class="user-close">ปิดการใช้งาน :</h2>
+                <h2 class="user-close">ปิดการใช้งาน : <?php echo $inactiveCount; ?> คน</h2>
                 <h2 class="total-amount">ยอดเงินรวม :</h2>
             </div>
 
@@ -714,7 +724,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const row = button.closest('tr');
         const rowID = row.getAttribute('data-row-id');
 
-        console.log(`Row ID: ${rowID}`);
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -724,6 +733,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 statusCell.innerText = statusValue === 1 ? "Active" : "Disable";
 
                 updateActionButtons();
+                refreshInactiveCount();
             } else {
                 alert('Failed to update status!');
             }
@@ -732,27 +742,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function deleteRow(button) {
-        if (!confirm("ต้องการลบข้อมูลใช่ไหม?")) {
+        if (!confirm("คุณต้องการลบข้อมูลนี้ใช่หรือไม่?")) {
             return;
         }
 
         const row = button.closest('tr');
         const rowID = row.getAttribute('data-row-id');
 
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                alert('ทำการลบสำเร็จแล้ว!');
-                row.remove();
-            } else {
-                alert('ทำการลบไม่สำเร็จแล้ว!');
-            }
-        };
-
-        xhr.send(`RowID=${rowID}&Action=DeleteRow`);
+        fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `RowID=${rowID}&Action=DeleteRow`
+            })
+            .then(response => response.text())
+            .then(result => {
+                if (result.trim() === 'Success') {
+                    row.remove();
+                    countInactiveRows();
+                    alert('ลบข้อมูลสำเร็จ!');
+                } else {
+                    alert('ลบข้อมูลไม่สำเร็จ!');
+                }
+            })
+            .catch(error => console.error('Error:', error));
     }
+
 
     function deleteCategory(categoryId, button) {
         if (!confirm("ต้องการลบ Category ใช่ไหม?")) return;
@@ -913,7 +929,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             .then(data => {
                 totalPages = data.totalPages;
                 renderTable(data.data);
-                updatePagination(data.totalRows, totalPages, page);
+                const userCloseElement = document.querySelector('.user-close');
+                userCloseElement.innerText = `ปิดการใช้งาน : ${data.inactiveCount} คน`;
+                updatePagination(data.totalRows, data.totalPages, page);
                 updateActionButtons();
                 document.querySelector('.data-table tbody').addEventListener('click', function(event) {
                     if (event.target.matches('.red-button')) {
@@ -1011,6 +1029,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         rowsPerPage = 10;
         loadTableData(currentPage, rowsPerPage);
     });
+
+    function countInactiveRows() {
+        let inactiveCount = 0;
+        const rows = document.querySelectorAll('.data-table tbody tr');
+
+        rows.forEach(row => {
+            const statusCell = row.querySelector('td:nth-child(6)'); // Status column
+            if (statusCell && (statusCell.innerText.trim() === 'Disable' || statusCell.innerText.trim() ===
+                    '0')) {
+                inactiveCount++;
+            }
+        });
+
+        document.querySelector('.user-close').innerText = `ปิดการใช้งาน : ${inactiveCount} คน`;
+    }
+
+    function refreshInactiveCount() {
+        fetch('phone_number_management.php?fetchData=1')
+            .then(response => response.json())
+            .then(data => {
+                const userCloseElement = document.querySelector('.user-close');
+                userCloseElement.innerText = `ปิดการใช้งาน : ${data.inactiveCount} คน`;
+            })
+            .catch(error => console.error('Error refreshing inactive count:', error));
+    }
     </script>
 </body>
 
