@@ -190,6 +190,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="email" id="email" name="email" class="form-control rounded-pill"
                     value="<?php echo htmlspecialchars($user['Email']); ?>" required>
             </div>
+            <p class="text-right">
+                     <a href="#" data-toggle="modal" data-target="#forgotPasswordModal">Forgot password?</a>
+                 </p>
             <div class="btn">
                 <button type="submit" class="btn btn-primary rounded-pill">บันทึก</button>
                 <button type="button" class="btn btn-outline-secondary rounded-pill"

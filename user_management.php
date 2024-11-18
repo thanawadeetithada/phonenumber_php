@@ -236,7 +236,7 @@ if (isset($_GET['delete_user'])) {
                 </tr>
             </thead>
             <tbody>
-                
+
                 <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($row['Name']); ?></td>
@@ -266,9 +266,6 @@ if (isset($_GET['delete_user'])) {
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">Edit User</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
                             </div>
                             <form id="editUserForm<?php echo $row['id']; ?>" method="POST">
                                 <div class="modal-body">
@@ -295,10 +292,10 @@ if (isset($_GET['delete_user'])) {
                                     </div>
                                 </div>
                                 <div class="modal-footer-user">
-                                    <button type="button" class="btn btn-outline-secondary rounded-pill"
-                                        data-dismiss="modal">ยกเลิก</button>
                                     <button type="submit"
                                         class="btn btn-primary rounded-pill saveUserButton">บันทึกข้อมูล</button>
+                                    <button type="button" class="btn btn-outline-secondary rounded-pill"
+                                        data-dismiss="modal">ยกเลิก</button>
                                 </div>
                             </form>
 

@@ -40,7 +40,7 @@ a:hover {
 }
 
 .card.login {
-    padding: 1.5rem;
+    padding: 2.5rem;
     border-radius: 1rem;
 }
 
@@ -190,7 +190,7 @@ a:hover {
 }
 
 .card p {
-    margin: 0 0 20px;
+    margin: 0px;
     color: #4caf50;
 }
 
@@ -456,4 +456,33 @@ h5 {
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+p#passwordError {
+    color: red;
+    margin-bottom: 0px;
+    margin-left: 15px;
+    margin-top: 15px;
+    display: none;
+}
+.form-group {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 2;
+}
+
+.form-group-label {
+    font-weight: 600;
+    padding-left: 5px;
+}
+
+.form-group input {
+    padding-bottom: 10px;
 }
