@@ -23,10 +23,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetchData'])) {
     $queryInactiveCount = "SELECT COUNT(*) as inactiveCount FROM phonenumber WHERE status = 0";
     $resultInactiveCount = $conn->query($queryInactiveCount);
 
+    $queryTotalAmount = "SELECT SUM(amount) as totalAmount FROM phonenumber WHERE status != 0";
+    $resultTotalAmount = $conn->query($queryTotalAmount);
+
     $inactiveCount = 0;
     if ($resultInactiveCount) {
         $row = $resultInactiveCount->fetch_assoc();
         $inactiveCount = $row['inactiveCount'];
+    }
+
+    $totalAmount = 0;
+    if ($resultTotalAmount) {
+        $row = $resultTotalAmount->fetch_assoc();
+        $totalAmount = $row['totalAmount'] ?? 0;
     }
 
     header('Content-Type: application/json');
@@ -34,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetchData'])) {
         'data' => $data,
         'totalRows' => $totalRows,
         'inactiveCount' => $inactiveCount,
+        'totalAmount' => $totalAmount,
         'totalPages' => $totalPages,
         'currentPage' => $currentPage,
     ]);
@@ -686,7 +696,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 });
                 saveIcon.outerHTML =
                     `<i class="fas fa-pencil-alt edit-icon" title="Edit" onclick="enableRowEdit(this)"></i>`;
-            } else {
+                loadTableData(currentPage, rowsPerPage);
+                } else {
                 alert('แก้ไขข้อมูลไม่สำเร็จ!');
             }
         };
@@ -733,7 +744,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 statusCell.innerText = statusValue === 1 ? "Active" : "Disable";
 
                 updateActionButtons();
-                refreshInactiveCount();
+                loadTableData(currentPage, rowsPerPage);
             } else {
                 alert('Failed to update status!');
             }
@@ -901,6 +912,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } else {
                     console.error("Request failed:", xhr.status, xhr.statusText);
                 }
+                loadTableData(currentPage, rowsPerPage);
             };
 
             const data =
@@ -930,10 +942,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 totalPages = data.totalPages;
                 const showMemberElement = document.querySelector('.show-member');
                 showMemberElement.innerText = `สมาชิกทั้งหมด : ${data.totalRows} คน`;
-
-                renderTable(data.data);
                 const userCloseElement = document.querySelector('.user-close');
                 userCloseElement.innerText = `ปิดการใช้งาน : ${data.inactiveCount} คน`;
+                const totalAmountElement = document.querySelector('.total-amount');
+                totalAmountElement.innerText = `ยอดเงินรวม : ${data.totalAmount} บาท`;
+
+                renderTable(data.data);
                 updatePagination(data.totalRows, data.totalPages, page);
                 updateActionButtons();
                 document.querySelector('.data-table tbody').addEventListener('click', function(event) {
@@ -1038,7 +1052,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const rows = document.querySelectorAll('.data-table tbody tr');
 
         rows.forEach(row => {
-            const statusCell = row.querySelector('td:nth-child(6)'); // Status column
+            const statusCell = row.querySelector('td:nth-child(6)');
             if (statusCell && (statusCell.innerText.trim() === 'Disable' || statusCell.innerText.trim() ===
                     '0')) {
                 inactiveCount++;
@@ -1048,15 +1062,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.querySelector('.user-close').innerText = `ปิดการใช้งาน : ${inactiveCount} คน`;
     }
 
-    function refreshInactiveCount() {
-        fetch('phone_number_management.php?fetchData=1')
-            .then(response => response.json())
-            .then(data => {
-                const userCloseElement = document.querySelector('.user-close');
-                userCloseElement.innerText = `ปิดการใช้งาน : ${data.inactiveCount} คน`;
-            })
-            .catch(error => console.error('Error refreshing inactive count:', error));
-    }
     </script>
 </body>
 
