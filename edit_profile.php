@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .form-group label {
         display: block;
         margin-bottom: 5px;
-        font-size: 14px;
+        font-size: 16px;
         color: #333;
         font-weight: bold;
     }
@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     .form-group input {
         width: -webkit-fill-available;
         padding: 10px;
-        font-size: 16px;
+        font-size: 18px;
         border: 1px solid #ccc;
         border-radius: 5px;
     }
