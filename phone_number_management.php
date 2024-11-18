@@ -1,5 +1,35 @@
 <?php
 include 'config.php';
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetchData'])) {
+    $rowsPerPage = isset($_GET['rowsPerPage']) ? (int)$_GET['rowsPerPage'] : 10;
+    $currentPage = isset($_GET['currentPage']) ? (int)$_GET['currentPage'] : 1;
+
+    $rowsPerPage = max(1, $rowsPerPage);
+    $currentPage = max(1, $currentPage);
+
+    $offset = ($currentPage - 1) * $rowsPerPage;
+
+    $stmt = $conn->prepare("SELECT * FROM phonenumber LIMIT ? OFFSET ?");
+    $stmt->bind_param('ii', $rowsPerPage, $offset);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = $result->fetch_all(MYSQLI_ASSOC);
+
+    $totalRowsResult = $conn->query("SELECT COUNT(*) as totalRows FROM phonenumber");
+    $totalRows = $totalRowsResult->fetch_assoc()['totalRows'];
+
+    $totalPages = ceil($totalRows / $rowsPerPage);
+
+    header('Content-Type: application/json');
+    echo json_encode([
+        'data' => $data,
+        'totalRows' => $totalRows,
+        'totalPages' => $totalPages,
+        'currentPage' => $currentPage,
+    ]);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rowID = $_POST['RowID'] ?? null;
     $userID = $_POST['UserID'] ?? null;
@@ -165,11 +195,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'UpdateStatus') {
         $status = $_POST['Status'] ?? null;
-
-        if ($status !== null && $rowID !== null) {
+    
+        if ($status !== null && $rowID !== null) { 
             $stmt = $conn->prepare("UPDATE phonenumber SET status = ? WHERE id = ?");
             $stmt->bind_param('ii', $status, $rowID);
-
+        
             if ($stmt->execute()) {
                 echo "Success";
             } else {
@@ -177,11 +207,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $stmt->close();
-        }
+        }        
         $conn->close();
         exit;
     }
-
+    
     if ($action === 'DeleteRow') {
         if ($rowID !== null) {
             $stmt = $conn->prepare("DELETE FROM phonenumber WHERE id = ?");
@@ -337,6 +367,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ?>
                     </tbody>
                 </table>
+            </div>
+            <div class="pagination-container">
+                <div class="left-group">
+                    <label for="rowsPerPage">Rows per page:</label>
+                    <select id="rowsPerPage" onchange="changeRowsPerPage(this.value)">
+                        <option value="5">5</option>
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                    </select>
+                </div>
+                <div class="center-group">
+                    <span id="paginationInfo"></span>
+                </div>
+                <div class="right-group">
+                    <button id="firstPage" onclick="goToFirstPage()">
+                        <i class="fas fa-angle-double-left"></i>
+                    </button>
+                    <button id="prevPage" onclick="changePage('prev')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <span id="currentPageDisplay">1</span>
+                    <button id="nextPage" onclick="changePage('next')">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button id="lastPage" onclick="goToLastPage()">
+                        <i class="fas fa-angle-double-right"></i>
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -503,7 +561,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const rows = document.querySelectorAll('.data-table tbody tr');
         rows.forEach(row => {
             const statusCell = row.querySelector('td:nth-child(6)');
-            const statusText = statusCell.innerText.trim();
+            const statusText = statusCell ? statusCell.innerText.trim() : '';
             const disableButton = row.querySelector('button.red-button');
             const activeButton = row.querySelector('button.green-button');
 
@@ -654,11 +712,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const row = button.closest('tr');
         const rowID = row.getAttribute('data-row-id');
 
+        console.log(`Row ID: ${rowID}`);
         const xhr = new XMLHttpRequest();
         xhr.open('POST', '', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
-            if (xhr.status === 200) {
+            if (xhr.status === 200 && xhr.responseText.trim() === "Success") {
                 const statusCell = row.querySelector('td:nth-child(6)');
                 statusCell.innerText = statusValue === 1 ? "Active" : "Disable";
 
@@ -832,6 +891,124 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             xhr.send(data);
         });
     }
+    let currentPage = 1;
+    let totalPages = 1;
+    let rowsPerPage = 10;
+
+    function goToFirstPage() {
+        currentPage = 1;
+        loadTableData(currentPage, rowsPerPage);
+    }
+
+    function goToLastPage() {
+        currentPage = totalPages;
+        loadTableData(currentPage, rowsPerPage);
+    }
+
+    function loadTableData(page, rows) {
+        fetch(`phone_number_management.php?fetchData=1&currentPage=${page}&rowsPerPage=${rows}`)
+            .then(response => response.json())
+            .then(data => {
+                totalPages = data.totalPages;
+                renderTable(data.data);
+                updatePagination(data.totalRows, totalPages, page);
+                updateActionButtons();
+                document.querySelector('.data-table tbody').addEventListener('click', function(event) {
+                    if (event.target.matches('.red-button')) {
+                        toggleStatus(event.target, 0);
+                    } else if (event.target.matches('.green-button')) {
+                        toggleStatus(event.target, 1);
+                    }
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+
+    function renderTable(data) {
+        const tableBody = document.querySelector('.data-table tbody');
+        tableBody.innerHTML = '';
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.setAttribute('data-row-id', row.id);
+            tr.innerHTML = `
+            <td>${row.phonenumber}</td>
+            <td>${row.UserID || '-'}</td>
+            <td>${row.category || '-'}</td>
+            <td>${row.amount}</td>
+            <td>${row.tag || '-'}</td>
+            <td>${row.status == 1 ? 'Active' : 'Disable'}</td>
+            <td><i class='fas fa-pencil-alt edit-icon' title='Edit' onclick='enableRowEdit(this)'></i></td>
+            <td>
+                                                <button class='yellow-button' onclick='clearAmount(this)'>Clear Amount</button>
+                                                <button class='red-button' onclick='toggleStatus(this, 0)'>Disable</button>
+                                                <button class='green-button' onclick='toggleStatus(this, 1)'>Active</button>
+                                                <button class='red-button' onclick='deleteRow(this)'>Delete</button>
+                                          </td>
+        `
+            tableBody.appendChild(tr);
+        });
+    }
+
+    function updatePagination(totalRows, totalPages, currentPage) {
+        const paginationInfo = document.getElementById('paginationInfo');
+        paginationInfo.innerText = `${(currentPage - 1) * rowsPerPage + 1}-${Math.min(
+        totalRows,
+        currentPage * rowsPerPage
+    )} of ${totalRows} rows`;
+
+        updatePaginationButtons();
+    }
+
+    function updatePaginationButtons() {
+        const firstPageButton = document.getElementById('firstPage');
+        const prevPageButton = document.getElementById('prevPage');
+        const nextPageButton = document.getElementById('nextPage');
+        const lastPageButton = document.getElementById('lastPage');
+
+        firstPageButton.disabled = currentPage === 1;
+        prevPageButton.disabled = currentPage === 1;
+        nextPageButton.disabled = currentPage === totalPages;
+        lastPageButton.disabled = currentPage === totalPages;
+
+        document.getElementById('currentPageDisplay').innerText = currentPage;
+    }
+
+    function changePage(direction) {
+        if (direction === 'prev' && currentPage > 1) {
+            currentPage--;
+        } else if (direction === 'next' && currentPage < totalPages) {
+            currentPage++;
+        }
+        updatePaginationButtons();
+        loadTableData(currentPage, rowsPerPage);
+    }
+
+    function changeRowsPerPage(rows) {
+        rowsPerPage = parseInt(rows);
+        loadTableData(1, rowsPerPage);
+    }
+
+
+    function updatePaginationButtons() {
+        const firstPageButton = document.getElementById('firstPage');
+        const prevPageButton = document.getElementById('prevPage');
+        const nextPageButton = document.getElementById('nextPage');
+        const lastPageButton = document.getElementById('lastPage');
+
+        firstPageButton.disabled = currentPage === 1;
+        prevPageButton.disabled = currentPage === 1;
+        nextPageButton.disabled = currentPage === totalPages;
+        lastPageButton.disabled = currentPage === totalPages;
+
+        document.getElementById('currentPageDisplay').innerText = currentPage;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        currentPage = 1;
+        rowsPerPage = 10;
+        loadTableData(currentPage, rowsPerPage);
+    });
     </script>
 </body>
 
