@@ -283,7 +283,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
-    <?php include 'include/header.php';?>
+    <header>
+        <?php include 'include/header.php';?>
+    </header>
     <div class="centered-container">
         <div class="card">
             <h1>Phone Number Management</h1>
