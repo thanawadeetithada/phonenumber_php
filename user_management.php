@@ -7,6 +7,11 @@ if (!isset($_SESSION['isShowManagement']) || $_SESSION['isShowManagement'] != 1)
     exit();
 }
 
+$count_query = "SELECT COUNT(*) AS total_users FROM users_collection";
+$count_result = $conn->query($count_query);
+$count_row = $count_result->fetch_assoc();
+$total_users = $count_row['total_users']; 
+
 $query = "SELECT * FROM users_collection";
 $result = $conn->query($query);
 
@@ -196,6 +201,13 @@ if (isset($_GET['delete_user'])) {
     .modal-footer-user button {
         width: 25%;
     }
+
+    .icon-disabled {
+        color: gray;
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
     </style>
 </head>
 
@@ -224,7 +236,7 @@ if (isset($_GET['delete_user'])) {
                 </tr>
             </thead>
             <tbody>
-
+                
                 <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($row['Name']); ?></td>
@@ -239,9 +251,13 @@ if (isset($_GET['delete_user'])) {
                         <i class='fas fa-pencil-alt edit-icon' data-toggle='modal' style='margin-right: 10px;'
                             data-target='#editUserModal<?php echo $row['id']; ?>'></i>
 
+                        <?php if ($total_users <= 1): ?>
+                        <i class="fa-regular fa-trash-can icon-disabled" title="ไม่สามารถลบผู้ใช้นี้ได้"></i>
+                        <?php else: ?>
                         <i class="fa-regular fa-trash-can"
-                            onclick="if(confirm('ต้องการลบ ข้อมูลผู้ใช้นี้ใช่ไหม?')) window.location.href='delete_user.php?id=<?php echo $row['id']; ?>';"
+                            onclick="if(confirm('ต้องการลบข้อมูลผู้ใช้นี้ใช่ไหม?')) window.location.href='?delete_user=<?php echo $row['id']; ?>';"
                             style="cursor: pointer; color: red;"></i>
+                        <?php endif; ?>
                     </td>
                 </tr>
 
