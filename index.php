@@ -84,7 +84,7 @@ if (isset($_POST['register'])) {
 </head>
 <body>
     <div class="container">
-        <div class="card login">
+        <div class="card login" style="max-width: 400px;">
             <h2 class="title text-center">Login</h2>
             <?php if (isset($error)): ?>
                 <div class="alert alert-danger"><?php echo $error; ?></div>
@@ -153,9 +153,6 @@ if (isset($_POST['register'])) {
         <div class="modal-content modal">
             <div class="modal-header align-items-center">
                 <h5 class="modal-title mx-auto" id="forgotPasswordModalLabel">Forgot your password?</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
             </div>
             <div class="modal-body px-4">
                 <p class="px-2">กรุณาใส่อีเมลที่คุณต้องการรีเซ็ตรหัสผ่าน</p>
@@ -164,8 +161,8 @@ if (isset($_POST['register'])) {
                         <input type="email" name="email" class="form-control rounded-pill" placeholder="Enter email address" required>
                     </div>
                     <div class="d-flex justify-content-end">
-                        <button type="button" class="btn btn-link" data-dismiss="modal">กลับไปหน้า Login</button>
                         <button type="submit" class="btn btn-primary rounded-pill">Reset password</button>
+                        <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
