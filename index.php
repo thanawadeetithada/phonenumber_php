@@ -32,32 +32,46 @@ if (isset($_POST['register'])) {
     $confirm_password = trim($_POST['confirm_password']);
 
     if ($password !== $confirm_password) {
-        echo "<script>alert('รหัสผ่านไม่ตรงกัน!');</script>";
+        $error_message = "รหัสผ่านไม่ตรงกัน!";
+        $name_input = $name;
+        $email_input = $email;
+        echo "<script>
+            $(document).ready(function() {
+                $('#registerModal').modal('show');
+            });
+        </script>";
     } else {
         $query = "SELECT * FROM users_collection WHERE Email = ? LIMIT 1";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            echo "<script>alert('อีเมลนี้มีการลงทะเบียนแล้ว!');</script>";
+    
+    if ($result->num_rows > 0) {
+        $error_message = "อีเมลนี้มีการลงทะเบียนแล้ว!";
+        $name_input = $name;
+        $email_input = $email;
+        echo "<script>
+            $(document).ready(function() {
+                $('#registerModal').modal('show');
+            });
+        </script>";
         } else {
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            $sql = "INSERT INTO users_collection (Name, Email, password, isShowManagement, isShowData) 
+            $sql = "INSERT INTO users_collection (Name, Email, password, isShowManagement, isShowData)
                     VALUES (?, ?, ?, 0, 0)";
             $stmt = $conn->prepare($sql);
             $stmt->bind_param("sss", $name, $email, $hashed_password);
 
             if ($stmt->execute()) {
                 echo "<script>
-                    alert('ลงทะเบียนสำเร็จแล้ว!');
-                    window.location.href = 'index.php';
-                </script>";
-            } else {
-                echo "<script>alert('Error: Could not register.');</script>";
-            }
+                alert('ลงทะเบียนสำเร็จแล้ว!');
+                window.location.href = 'index.php';
+            </script>";
+        } else {
+            echo "<script>alert('Error: Could not register.');</script>";
+        }
         }
     }
 }
@@ -83,8 +97,7 @@ if (isset($_POST['register'])) {
     }
 
     .alert-danger {
-        margin-bottom: 0px;
-        margin-top: 20px;
+        margin-bottom: 10px;
     }
     </style>
 </head>
@@ -125,29 +138,35 @@ if (isset($_POST['register'])) {
                 </div>
                 <form method="POST" action="">
                     <div class="modal-body px-4">
+                        <?php if (isset($error_message)): ?>
+                        <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
+                        <?php endif; ?>
                         <div class="form-group">
                             <label class="form-group-label" for="name">Name</label>
                             <input type="text" name="name" id="name" class="form-control rounded-pill"
-                                placeholder="Enter your name" required>
+                                placeholder="Enter your name"
+                                value="<?php echo isset($name_input) ? htmlspecialchars($name_input) : ''; ?>" required>
                         </div>
                         <div class="form-group">
                             <label class="form-group-label" for="email">Email</label>
                             <input type="email" name="email" id="email" class="form-control rounded-pill"
-                                placeholder="Enter your email" required>
+                                placeholder="Enter your email"
+                                value="<?php echo isset($email_input) ? htmlspecialchars($email_input) : ''; ?>"
+                                required>
                         </div>
                         <div class="form-group">
                             <label class="form-group-label" for="registerPassword">Password</label>
-                            <input type="password" name="password" id="registerPassword" class="form-control rounded-pill" 
-                            placeholder="Enter your password" required>
+                            <input type="password" name="password" id="registerPassword"
+                                class="form-control rounded-pill" placeholder="Enter your password" required>
                             <i class="fa fa-eye-slash toggle-password" data-target="registerPassword"
-                            style="top: 3.1rem;padding-right: 5px;"></i>
+                                style="top: 3.1rem;padding-right: 5px;"></i>
                         </div>
                         <div class="form-group">
                             <label class="form-group-label" for="confirmPassword">Confirm Password</label>
                             <input type="password" name="confirm_password" id="confirmPassword"
                                 class="form-control rounded-pill" placeholder="Confirm your password" required>
                             <i class="fa fa-eye-slash toggle-password" data-target="confirmPassword"
-                            style="top: 3.1rem;padding-right: 5px;"></i>
+                                style="top: 3.1rem;padding-right: 5px;"></i>
                         </div>
                     </div>
                     <div class="modal-footer registor">
@@ -204,6 +223,14 @@ if (isset($_POST['register'])) {
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        // หาก error_message ถูกเซ็ตไว้ใน PHP, modal จะถูกเปิด
+        <?php if (isset($error_message)): ?>
+        $('#registerModal').modal('show');
+        <?php endif; ?>
+    });
+    </script>
 </body>
 
 </html>
