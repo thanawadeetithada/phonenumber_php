@@ -172,7 +172,7 @@ if (isset($_POST['register'])) {
                     <div class="modal-footer registor">
                         <button type="submit" name="register" class="btn btn-primary rounded-pill">Register</button>
                         <p class="text-center">
-                            <a href="#" data-dismiss="modal">Have an Account? Login Here</a>
+                            <a href="#" class="login-link" data-dismiss="modal">Have an Account? Login Here</a>
                         </p>
                     </div>
                 </form>
@@ -225,10 +225,16 @@ if (isset($_POST['register'])) {
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
     $(document).ready(function() {
-        // หาก error_message ถูกเซ็ตไว้ใน PHP, modal จะถูกเปิด
         <?php if (isset($error_message)): ?>
         $('#registerModal').modal('show');
         <?php endif; ?>
+
+        $('#registerModal').on('hide.bs.modal', function(event) {
+            $(this).find('form')[0].reset();
+            $(this).find('.alert-danger').remove();
+            $(this).find('#name').val('');
+            $(this).find('#email').val('');
+        });
     });
     </script>
 </body>
