@@ -553,6 +553,7 @@ if ($result->num_rows > 0) {
                 row.style.display = 'none';
             }
         });
+        updateActionButtons();
     }
 
     function searchTable() {
@@ -574,6 +575,7 @@ if ($result->num_rows > 0) {
 
             row.style.display = match ? '' : 'none';
         });
+        updateActionButtons();
     }
     document.addEventListener("DOMContentLoaded", () => {
         updateActionButtons();
@@ -600,6 +602,19 @@ if ($result->num_rows > 0) {
                 activeButton.classList.add('active');
             }
         });
+        const downloadButton = document.querySelector('.green-button[onclick="downloadExcel()"]');
+        let visibleRowCount = 0;
+
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                visibleRowCount++;
+            }
+        });
+        if (visibleRowCount === 0) {
+            downloadButton.disabled = true;
+        } else {
+            downloadButton.disabled = false;
+        }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1045,6 +1060,7 @@ if ($result->num_rows > 0) {
         currentPage = 1;
         rowsPerPage = 10;
         loadTableData(currentPage, rowsPerPage);
+        updateActionButtons();
     });
 
     function countInactiveRows() {
