@@ -200,24 +200,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </form>
     </div>
-    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog"
-        aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+    <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content modal">
                 <div class="modal-header align-items-center">
-                    <h5 class="modal-title mx-auto" id="forgotPasswordModalLabel">Forgot your password?</h5>
+                    <h5 class="modal-title mx-auto">Forgot Password</h5>
                 </div>
                 <div class="modal-body px-4">
-                    <p class="px-2">กรุณาใส่อีเมลที่คุณต้องการรีเซ็ตรหัสผ่าน</p>
-                    <form id="forgotPasswordForm" method="POST" action="">
+                    <form id="forgotPasswordForm" method="POST" action="process_forgot_password.php">
                         <div class="form-group">
                             <input type="email" name="email" class="form-control rounded-pill"
-                                placeholder="Enter email address" required>
+                                placeholder="Enter your email address" required>
                         </div>
-                        <div class="d-flex justify-content-end gap-1">
-                            <button type="submit" class="btn btn-primary rounded-pill">Reset password</button>
-                            <button type="button" class="btn btn-outline-secondary rounded-pill"
-                                data-dismiss="modal">Cancel</button>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary rounded-pill">Send Reset Link</button>
+                            <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         </div>
                     </form>
                 </div>
