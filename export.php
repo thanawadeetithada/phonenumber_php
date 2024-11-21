@@ -1,52 +1,59 @@
 <?php
-require 'vendor/autoload.php';
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-
 include 'config.php';
 
-$postData = file_get_contents('php://input');
-$data = json_decode($postData, true);
-
+$data = json_decode(file_get_contents('php://input'), true);
 $selectedCategory = $data['selectedCategory'] ?? 'all';
-$search = $data['search'] ?? '';
-$tableData = $data['tableData'] ?? [];
+$searchInput = $data['search'] ?? '';
+
+$query = "SELECT phonenumber, UserID, category, amount, tag, status FROM phonenumber WHERE 1=1";
+
+if ($selectedCategory !== 'all') {
+    $query .= " AND category = ?";
+}
+
+if (!empty($searchInput)) {
+    $query .= " AND (phonenumber LIKE ? OR UserID LIKE ? OR category LIKE ? OR tag LIKE ?)";
+}
+
+$stmt = $conn->prepare($query);
+
+$bindParams = [];
+if ($selectedCategory !== 'all') {
+    $bindParams[] = $selectedCategory;
+}
+if (!empty($searchInput)) {
+    $searchWildcard = '%' . $searchInput . '%';
+    $bindParams = array_merge($bindParams, [$searchWildcard, $searchWildcard, $searchWildcard, $searchWildcard]);
+}
+if ($bindParams) {
+    $stmt->bind_param(str_repeat('s', count($bindParams)), ...$bindParams);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$data = $result->fetch_all(MYSQLI_ASSOC);
+
+require 'vendor/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 $spreadsheet = new Spreadsheet();
 $sheet = $spreadsheet->getActiveSheet();
 
-$sheet->setCellValue('A1', 'Phone Number');
-$sheet->setCellValue('B1', 'UserID');
-$sheet->setCellValue('C1', 'Category');
-$sheet->setCellValue('D1', 'Amount');
-$sheet->setCellValue('E1', 'Tag');
-$sheet->setCellValue('F1', 'Status');
+$headers = ['Phone Number', 'UserID', 'Category', 'Amount', 'Tag', 'Status'];
+$sheet->fromArray($headers, NULL, 'A1');
 
 $rowIndex = 2;
-
-foreach ($tableData as $row) {
-    $phoneNumber = strtolower($row[0]);
-    $category = strtolower($row[2]);
-
-    $matchCategory = $selectedCategory === 'all' || $category === strtolower($selectedCategory);
-    $matchSearch = empty($search) || strpos($phoneNumber, $search) !== false;
-
-    if ($matchCategory && $matchSearch) {
-        $sheet->setCellValue('A' . $rowIndex, $row[0]);
-        $sheet->setCellValue('B' . $rowIndex, $row[1]);
-        $sheet->setCellValue('C' . $rowIndex, $row[2]);
-        $sheet->setCellValue('D' . $rowIndex, $row[3]);
-        $sheet->setCellValue('E' . $rowIndex, $row[4]);
-        $sheet->setCellValue('F' . $rowIndex, $row[5]);
-        $rowIndex++;
-    }
+foreach ($data as $row) {
+    $sheet->fromArray(array_values($row), NULL, 'A' . $rowIndex);
+    $rowIndex++;
 }
 
-header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment;filename="FilteredTable.xlsx"');
-header('Cache-Control: max-age=0');
 
 $writer = new Xlsx($spreadsheet);
+header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+header('Content-Disposition: attachment; filename="PhoneNumbers.xlsx"');
 $writer->save('php://output');
 exit;
 ?>

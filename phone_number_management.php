@@ -1071,23 +1071,8 @@ if ($result->num_rows > 0) {
     }
 
     function downloadExcel() {
-        const tableRows = document.querySelectorAll('.data-table tbody tr');
-        const data = [];
         const selectedCategory = document.getElementById('category-dropdown').value;
         const searchInput = document.getElementById('search-input').value.trim().toLowerCase();
-
-        tableRows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-            const rowData = [];
-            if (row.style.display !== 'none') {
-                cells.forEach((cell, index) => {
-                    if (index < cells.length - 1) {
-                        rowData.push(cell.innerText.trim());
-                    }
-                });
-                data.push(rowData);
-            }
-        });
 
         fetch('export.php', {
                 method: 'POST',
@@ -1095,9 +1080,8 @@ if ($result->num_rows > 0) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    tableData: data,
                     selectedCategory: selectedCategory,
-                    search: searchInput
+                    search: searchInput 
                 }),
             })
             .then(response => response.blob())
