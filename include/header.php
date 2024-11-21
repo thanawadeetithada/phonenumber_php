@@ -29,15 +29,21 @@ $isShowManagement = $_SESSION['isShowManagement'] ?? false;
             <h1 class="tab-title">Phone Number Management</h1>
             <nav class="tab-nav">
                 <ul class="tab-menu">
+                    <?php if ($isShowData): ?>
                     <li class="dropdown">
                         <a href="#" title="User Management">
                             <i class="fas fa-user"></i>
                         </a>
                         <div class="dropdown-menu">
+                        <?php if ($isShowData): ?>
                             <a href="edit_profile.php">Edit Profile</a>
+                        <?php endif; ?>
+                        <?php if ($isShowManagement): ?>
                             <a href="user_management.php">Users Management</a>
+                        <?php endif; ?>
                         </div>
                     </li>
+                    <?php endif; ?>
                     <li>
                         <a href="logout.php" title="Logout">
                             <i class="fas fa-sign-out-alt"></i>

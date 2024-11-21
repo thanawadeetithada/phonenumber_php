@@ -2,6 +2,13 @@
 session_start();
 include 'config.php';
 
+
+if (!isset($_SESSION['isShowData'])) {
+    $_SESSION['isShowData'] = false;
+}
+
+$isShowData = $_SESSION['isShowData'];
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit();
@@ -166,6 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 
 <body>
+<?php if ($isShowData): ?>
     <a href="phone_number_management.php" class="back-link">
         <i class="fa-solid fa-arrow-left-long"></i>
         <span>Edit Profile</span>
@@ -220,7 +228,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
         </div>
+        <?php else: ?>
+    <div style="text-align: center; padding: 50px; font-size: 20px;">
+        <p>No Data</p>
     </div>
+    <?php endif; ?>
 </body>
 
 </html>

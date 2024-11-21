@@ -2,10 +2,13 @@
 session_start();
 include 'config.php';
 
-if (!isset($_SESSION['isShowManagement']) || $_SESSION['isShowManagement'] != 1) {
-    header("Location: index.php");
-    exit();
+
+if (!isset($_SESSION['isShowManagement'])) {
+    $_SESSION['isShowManagement'] = false;
 }
+
+$isShowManagement = $_SESSION['isShowManagement'];
+
 
 $count_query = "SELECT COUNT(*) AS total_users FROM users_collection";
 $count_result = $conn->query($count_query);
@@ -15,26 +18,26 @@ $total_users = $count_row['total_users'];
 $query = "SELECT * FROM users_collection";
 $result = $conn->query($query);
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
-        $id = $_POST['id'];
-        $name = $_POST['name'];
-        $email = $_POST['email'];
-        $isShowManagement = isset($_POST['isShowManagement']) ? 1 : 0;
-        $isShowData = isset($_POST['isShowData']) ? 1 : 0;
-    
-        $update_query = "UPDATE users_collection SET Name = ?, Email = ?, isShowManagement = ?, isShowData = ? WHERE id = ?";
-        $stmt = $conn->prepare($update_query);
-        $stmt->bind_param("ssiii", $name, $email, $isShowManagement, $isShowData, $id);
-    
-        if ($stmt->execute()) {
-            http_response_code(200);
-            exit();
-        } else {
-            http_response_code(500);
-            exit();
-        }
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
+    $id = $_POST['id'];
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $isShowManagement = isset($_POST['isShowManagement']) ? 1 : 0;
+    $isShowData = isset($_POST['isShowData']) ? 1 : 0;
+
+    $update_query = "UPDATE users_collection SET Name = ?, Email = ?, isShowManagement = ?, isShowData = ? WHERE id = ?";
+    $stmt = $conn->prepare($update_query);
+    $stmt->bind_param("ssiii", $name, $email, $isShowManagement, $isShowData, $id);
+
+    if ($stmt->execute()) {
+        http_response_code(200);
+        exit();
+    } else {
+        http_response_code(500);
+        exit();
     }
-    
+}
+
 
 if (isset($_GET['delete_user'])) {
     $id = $_GET['delete_user'];
@@ -212,6 +215,7 @@ if (isset($_GET['delete_user'])) {
 </head>
 
 <body>
+    <?php if ($isShowManagement): ?>
     <a href="phone_number_management.php" class="back-link">
         <i class="fa-solid fa-arrow-left-long"></i>
         <span>User Management</span>
@@ -298,7 +302,6 @@ if (isset($_GET['delete_user'])) {
                                         data-dismiss="modal">ยกเลิก</button>
                                 </div>
                             </form>
-
                         </div>
                     </div>
                 </div>
@@ -306,6 +309,12 @@ if (isset($_GET['delete_user'])) {
             </tbody>
         </table>
     </div>
+    <?php else: ?>
+    <div style="text-align: center; padding: 50px; font-size: 20px;">
+        <p>No Data</p>
+    </div>
+    <?php endif; ?>
+
     <script>
     $(document).on('submit', '[id^="editUserForm"]', function(e) {
         e.preventDefault();
@@ -324,7 +333,7 @@ if (isset($_GET['delete_user'])) {
         });
     });
     </script>
-
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

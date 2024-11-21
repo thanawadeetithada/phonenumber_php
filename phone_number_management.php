@@ -1,5 +1,15 @@
 <?php
 include 'config.php';
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit;
+}
+if (!isset($_SESSION['isShowData']) || $_SESSION['isShowData'] == 0) {
+    $showData = false;
+} else {
+    $showData = true;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetchData'])) {
     $rowsPerPage = isset($_GET['rowsPerPage']) ? (int) $_GET['rowsPerPage'] : 10;
     $currentPage = isset($_GET['currentPage']) ? (int) $_GET['currentPage'] : 1;
@@ -307,6 +317,7 @@ if ($resultCategories) {
         <?php include 'include/header.php';?>
     </header>
     <div class="centered-container">
+        <?php if ($showData): ?>
         <div class="card">
             <h1>Phone Number Management</h1>
             <div class="header-info">
@@ -534,7 +545,10 @@ if ($result->num_rows > 0) {
                 </div>
             </div>
         </div>
-    </div>
+        <?php else: ?>
+            <h1 class="text-center" style="margin: 20px 0; color: red;">No Data</h1>
+    <?php endif; ?>
+</div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
