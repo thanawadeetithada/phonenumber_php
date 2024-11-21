@@ -326,7 +326,7 @@ if ($resultCategories) {
                 <div class="search-group">
                     <button class="green-button" onclick="downloadExcel()">Download</button>
                     <div class="search-box">
-                        <input type="text" placeholder="Search..." id="search-input" onkeyup="searchTable()" />
+                        <input type="text" placeholder="Search..." id="search-input" onkeyup="filterAndSearch()" />
                         <i class="fas fa-search search-icon"></i>
                     </div>
                 </div>
@@ -334,7 +334,7 @@ if ($resultCategories) {
 
             <div class="dropdown-container">
                 <h3 for="category-dropdown">Phone Numbers</h3>
-                <select id="category-dropdown" onchange="filterData()">
+                <select id="category-dropdown" onchange="filterAndSearch()">
                     <option value="all">All data</option>
                     <?php foreach ($categories as $category): ?>
                     <option value="<?=htmlspecialchars($category)?>"><?=htmlspecialchars($category)?></option>
@@ -539,42 +539,34 @@ if ($result->num_rows > 0) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-    function filterData() {
-        const selectedCategory = document.getElementById('category-dropdown').value;
+    function filterAndSearch() {
+        const searchInput = document.getElementById('search-input').value.trim().toLowerCase();
+        const selectedCategory = document.getElementById('category-dropdown').value.trim()
+            .toLowerCase();
         const rows = document.querySelectorAll('.data-table tbody tr');
 
         rows.forEach(row => {
-            const categoryCell = row.querySelector('td:nth-child(3)');
-            const category = categoryCell ? categoryCell.innerText.trim() : '';
+            const cells = row.querySelectorAll('td');
+            const category = cells[2].innerText.toLowerCase();
 
-            if (selectedCategory === 'all' || category === selectedCategory) {
+            let matchSearch = false;
+
+            for (let i = 0; i < cells.length - 1; i++) {
+                if (cells[i].innerText.toLowerCase().includes(searchInput)) {
+                    matchSearch = true;
+                    break;
+                }
+            }
+
+            const matchCategory = (selectedCategory === 'all' || category === selectedCategory);
+
+            if (matchSearch && matchCategory) {
                 row.style.display = '';
             } else {
                 row.style.display = 'none';
             }
         });
-        updateActionButtons();
-    }
 
-    function searchTable() {
-        const input = document.getElementById('search-input');
-        const filter = input.value.toLowerCase();
-        const rows = document.querySelectorAll('.data-table tbody tr');
-
-        rows.forEach(row => {
-            const cells = row.querySelectorAll('td');
-            let match = false;
-
-            cells.forEach((cell, index) => {
-                if (index === cells.length - 1) return;
-
-                if (cell.innerText.toLowerCase().includes(filter)) {
-                    match = true;
-                }
-            });
-
-            row.style.display = match ? '' : 'none';
-        });
         updateActionButtons();
     }
     document.addEventListener("DOMContentLoaded", () => {
