@@ -7,7 +7,22 @@ https://www.phpmyadmin.net/
 Server version: 10.4.32-MariaDB
 PHP Version: 8.2.12
 
-#Database: `phonenumber`
+# PhoneNumber Management System
+
+This project is a **PhoneNumber Management System** built using **PHP**, **MariaDB**, and **phpMyAdmin**. It allows users to manage phone numbers, categories, and tags, with user roles and access management.
+
+## Database Schema
+
+The database consists of three main tables: `phonenumber`, `total_category`, `total_tag`, and `users_collection`. Below is the SQL schema for setting up the database.
+
+---
+
+### Database: `phonenumber`
+
+#### **`phonenumber` Table**
+This table stores the phone numbers and related data.
+
+```sql
 CREATE TABLE `phonenumber` (
   `id` int(11) NOT NULL,
   `phonenumber` varchar(20) NOT NULL,
@@ -16,13 +31,12 @@ CREATE TABLE `phonenumber` (
   `category` varchar(50) DEFAULT NULL,
   `status` tinyint(1) DEFAULT 1,
   `tag` varchar(50) DEFAULT NULL
-)
+);
 
 CREATE TABLE `total_category` (
   `id` int(11) NOT NULL,
   `category` varchar(50) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 
 CREATE TABLE `total_tag` (
   `id` int(11) NOT NULL,
@@ -38,8 +52,7 @@ CREATE TABLE `users_collection` (
   `isShowData` tinyint(1) DEFAULT 0,
   `reset_token` varchar(255) DEFAULT NULL,
   `reset_expiry` datetime DEFAULT NULL
-) 
-
+);
 ALTER TABLE `phonenumber`
   ADD PRIMARY KEY (`id`);
 
@@ -66,4 +79,4 @@ ALTER TABLE `total_tag`
 
 ALTER TABLE `users_collection`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
-COMMIT;
+
