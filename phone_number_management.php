@@ -1,8 +1,8 @@
 <?php
 include 'config.php';
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['fetchData'])) {
-    $rowsPerPage = isset($_GET['rowsPerPage']) ? (int)$_GET['rowsPerPage'] : 10;
-    $currentPage = isset($_GET['currentPage']) ? (int)$_GET['currentPage'] : 1;
+    $rowsPerPage = isset($_GET['rowsPerPage']) ? (int) $_GET['rowsPerPage'] : 10;
+    $currentPage = isset($_GET['currentPage']) ? (int) $_GET['currentPage'] : 1;
 
     $rowsPerPage = max(1, $rowsPerPage);
     $currentPage = max(1, $currentPage);
@@ -57,46 +57,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tag = $_POST['Tag'] ?? null;
     $action = $_POST['Action'] ?? '';
 
-   if ($action === 'AddPhoneNumber') {
-    $phoneNumber = $_POST['phonenumber'] ?? '';
-    $category = $_POST['category'] ?? '';
+    if ($action === 'AddPhoneNumber') {
+        $phoneNumber = $_POST['phonenumber'] ?? '';
+        $category = $_POST['category'] ?? '';
 
-    if (!empty($phoneNumber) && !empty($category)) {
-        $stmt = $conn->prepare("SELECT COUNT(*) as count FROM phonenumber WHERE phonenumber = ?");
-        $stmt->bind_param('s', $phoneNumber);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
+        if (!empty($phoneNumber) && !empty($category)) {
+            $stmt = $conn->prepare("SELECT COUNT(*) as count FROM phonenumber WHERE phonenumber = ?");
+            $stmt->bind_param('s', $phoneNumber);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
 
-        if ($row['count'] > 0) {
-            echo "Duplicate";
-        } else {
-            $userID = "";
-            $amount = 0;
-            $status = 1;
-            $tag = "";
-
-            $stmt = $conn->prepare("INSERT INTO phonenumber (phonenumber, UserID, amount, category, status, tag) VALUES (?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param('ssdsss', $phoneNumber, $userID, $amount, $category, $status, $tag);
-
-            if ($stmt->execute()) {
-                echo "Success";
+            if ($row['count'] > 0) {
+                echo "Duplicate";
             } else {
-                error_log("SQL Error: " . $stmt->error);
-                echo "Error: " . $conn->error;
+                $userID = "";
+                $amount = 0;
+                $status = 1;
+                $tag = "";
+
+                $stmt = $conn->prepare("INSERT INTO phonenumber (phonenumber, UserID, amount, category, status, tag) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->bind_param('ssdsss', $phoneNumber, $userID, $amount, $category, $status, $tag);
+
+                if ($stmt->execute()) {
+                    echo "Success";
+                } else {
+                    error_log("SQL Error: " . $stmt->error);
+                    echo "Error: " . $conn->error;
+                }
             }
+            $stmt->close();
+        } else {
+            echo "Invalid Input";
         }
-        $stmt->close();
-    } else {
-        echo "Invalid Input";
+        $conn->close();
+        exit;
     }
-    $conn->close();
-    exit;
-}
 
     if ($action === 'DeleteTag') {
         $tagID = $_POST['id'] ?? null;
-        
+
         if (!empty($tagID) && is_numeric($tagID)) {
             $stmt = $conn->prepare("DELETE FROM total_tag WHERE id = ?");
             $stmt->bind_param('i', $tagID);
@@ -117,20 +117,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'AddTag') {
         $tagName = $_POST['tag'] ?? '';
-        
+
         if (!empty($tagName)) {
             $stmt = $conn->prepare("SELECT COUNT(*) as count FROM total_tag WHERE tag = ?");
             $stmt->bind_param('s', $tagName);
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
-    
+
             if ($row['count'] > 0) {
                 echo "Duplicate";
             } else {
                 $stmt = $conn->prepare("INSERT INTO total_tag (tag) VALUES (?)");
                 $stmt->bind_param('s', $tagName);
-    
+
                 if ($stmt->execute()) {
                     echo "Success:" . $conn->insert_id;
                 } else {
@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'DeleteCategory') {
         $categoryID = $_POST['id'] ?? null;
-        
+
         if (!empty($categoryID) && is_numeric($categoryID)) {
             $stmt = $conn->prepare("DELETE FROM total_category WHERE id = ?");
             $stmt->bind_param('i', $categoryID);
@@ -168,20 +168,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'AddCategory') {
         $categoryName = $_POST['category'] ?? '';
-    
+
         if (!empty($categoryName)) {
             $stmt = $conn->prepare("SELECT COUNT(*) as count FROM total_category WHERE category = ?");
             $stmt->bind_param('s', $categoryName);
             $stmt->execute();
             $result = $stmt->get_result();
             $row = $result->fetch_assoc();
-    
+
             if ($row['count'] > 0) {
                 echo "Duplicate";
             } else {
                 $stmt = $conn->prepare("INSERT INTO total_category (category) VALUES (?)");
                 $stmt->bind_param('s', $categoryName);
-    
+
                 if ($stmt->execute()) {
                     echo "Success";
                 } else {
@@ -195,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->close();
         exit;
     }
-    
+
     if ($action === 'ClearAmount') {
         if ($rowID !== null) {
             $stmt = $conn->prepare("UPDATE phonenumber SET amount = 0 WHERE id = ?");
@@ -215,11 +215,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($action === 'UpdateStatus') {
         $status = $_POST['Status'] ?? null;
-    
-        if ($status !== null && $rowID !== null) { 
+
+        if ($status !== null && $rowID !== null) {
             $stmt = $conn->prepare("UPDATE phonenumber SET status = ? WHERE id = ?");
             $stmt->bind_param('ii', $status, $rowID);
-        
+
             if ($stmt->execute()) {
                 echo "Success";
             } else {
@@ -227,11 +227,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $stmt->close();
-        }        
+        }
         $conn->close();
         exit;
     }
-    
+
     if ($action === 'DeleteRow') {
         if ($rowID !== null) {
             $stmt = $conn->prepare("DELETE FROM phonenumber WHERE id = ?");
@@ -269,25 +269,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     $conn->close();
     exit;
+}
+
+$query = "SELECT * FROM total_tag";
+$result = $conn->query($query);
+$tags = [];
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $tags[] = $row['tag'];
     }
+}
 
-        $query = "SELECT * FROM total_tag";
-        $result = $conn->query($query);
-        $tags = [];
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $tags[] = $row['tag'];
-            }
-        }
-
-        $queryCategories = "SELECT category FROM total_category";
-        $resultCategories = $conn->query($queryCategories);
-        $categories = [];
-        if ($resultCategories) {
-            while ($row = $resultCategories->fetch_assoc()) {
-                $categories[] = $row['category'];
-            }
-        }
+$queryCategories = "SELECT category FROM total_category";
+$resultCategories = $conn->query($queryCategories);
+$categories = [];
+if ($resultCategories) {
+    while ($row = $resultCategories->fetch_assoc()) {
+        $categories[] = $row['category'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -324,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Number</button>
                 </div>
                 <div class="search-group">
-                    <button class="green-button">Download</button>
+                    <button class="green-button" onclick="downloadExcel()">Download</button>
                     <div class="search-box">
                         <input type="text" placeholder="Search..." id="search-input" onkeyup="searchTable()" />
                         <i class="fas fa-search search-icon"></i>
@@ -358,35 +358,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </thead>
                     <tbody>
                         <?php
-                            $query = "SELECT id, phonenumber, UserID, category, amount, tag, status FROM phonenumber";
-                            $result = $conn->query($query);
+$query = "SELECT id, phonenumber, UserID, category, amount, tag, status FROM phonenumber";
+$result = $conn->query($query);
 
-                            if ($result) {
-                                while ($row = $result->fetch_assoc()) {
-                                    $amount = $row['amount'];
-                                    if (strpos($amount, '.') !== false && rtrim(substr($amount, strpos($amount, '.') + 1), '0') === '') {
-                                        $amount = (int) $amount;
-                                    }
-                                    echo "<tr data-row-id='" . htmlspecialchars($row['id']) . "'>";
-                                    echo "<td>" . htmlspecialchars($row['phonenumber']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['UserID']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['category']) . "</td>";
-                                    echo "<td>" . htmlspecialchars($amount) . "</td>";
-                                    echo "<td>" . htmlspecialchars($row['tag']) . "</td>";
-                                    echo "<td>" . ($row['status'] == 0 ? "Disable" : "Active") . "</td>";
-                                    echo "<td><i class='fas fa-pencil-alt edit-icon' title='Edit' onclick='enableRowEdit(this)'></i></td>";
-                                    echo "<td>
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $amount = $row['amount'];
+        if (strpos($amount, '.') !== false && rtrim(substr($amount, strpos($amount, '.') + 1), '0') === '') {
+            $amount = (int) $amount;
+        }
+        echo "<tr data-row-id='" . htmlspecialchars($row['id']) . "'>";
+        echo "<td>" . htmlspecialchars($row['phonenumber']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['UserID']) . "</td>";
+        echo "<td>" . htmlspecialchars($row['category']) . "</td>";
+        echo "<td>" . htmlspecialchars($amount) . "</td>";
+        echo "<td>" . htmlspecialchars($row['tag']) . "</td>";
+        echo "<td>" . ($row['status'] == 0 ? "Disable" : "Active") . "</td>";
+        echo "<td><i class='fas fa-pencil-alt edit-icon' title='Edit' onclick='enableRowEdit(this)'></i></td>";
+        echo "<td>
                                                 <button class='yellow-button' onclick='clearAmount(this)'>Clear Amount</button>
                                                 <button class='red-button' onclick='toggleStatus(this, 0)'>Disable</button>
                                                 <button class='green-button' onclick='toggleStatus(this, 1)'>Active</button>
                                                 <button class='red-button' onclick='deleteRow(this)'>Delete</button>
                                           </td>";
-                                    echo "</tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='8'>No data available</td></tr>";
-                            }
-                        ?>
+        echo "</tr>";
+    }
+} else {
+    echo "<tr><td colspan='8'>No data available</td></tr>";
+}
+?>
                     </tbody>
                 </table>
             </div>
@@ -438,20 +438,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <p class="existing-categories px-2 mb-2">Existing Categories</p>
                         <div class="existing-categories-list px-2 mb-4">
                             <?php
-                                  $query = "SELECT * FROM total_category";
-                                  $result = $conn->query($query);
+$query = "SELECT * FROM total_category";
+$result = $conn->query($query);
 
-                                  if ($result->num_rows > 0) {
-                                      while ($row = $result->fetch_assoc()) {
-                                          echo '<div class="d-flex justify-content-between align-items-center mb-2">';
-                                          echo '<span>' . htmlspecialchars($row['category']) . '</span>';
-                                          echo '<button type="button" class="red-button" onclick="deleteCategory(' . $row['id'] . ', this)">Delete</button>';
-                                          echo '</div>';
-                                      }
-                                  } else {
-                                      echo '<p style = "color: red;">No categories available.</p>';
-                                  }
-                                  ?>
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo '<div class="d-flex justify-content-between align-items-center mb-2">';
+        echo '<span>' . htmlspecialchars($row['category']) . '</span>';
+        echo '<button type="button" class="red-button" onclick="deleteCategory(' . $row['id'] . ', this)">Delete</button>';
+        echo '</div>';
+    }
+} else {
+    echo '<p style = "color: red;">No categories available.</p>';
+}
+?>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button class="green-button" onclick="addCategory()">Add Category</button>
@@ -479,20 +479,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <p class="existing-categories px-2 mb-2">Existing Tags</p>
                         <div class="existing-categories-list px-2 mb-4">
                             <?php
-                                  $query = "SELECT * FROM total_tag";
-                                  $result = $conn->query($query);
+$query = "SELECT * FROM total_tag";
+$result = $conn->query($query);
 
-                                  if ($result->num_rows > 0) {
-                                      while ($row = $result->fetch_assoc()) {
-                                          echo '<div class="d-flex justify-content-between align-items-center mb-2">';
-                                          echo '<span>' . htmlspecialchars($row['tag']) . '</span>';
-                                          echo '<button type="button" class="red-button" onclick="deleteTag(' . $row['id'] . ', this)">Delete</button>';
-                                          echo '</div>';
-                                      }
-                                  } else {
-                                      echo '<p style = "color: red;">No tag available.</p>';
-                                  }
-                                  ?>
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo '<div class="d-flex justify-content-between align-items-center mb-2">';
+        echo '<span>' . htmlspecialchars($row['tag']) . '</span>';
+        echo '<button type="button" class="red-button" onclick="deleteTag(' . $row['id'] . ', this)">Delete</button>';
+        echo '</div>';
+    }
+} else {
+    echo '<p style = "color: red;">No tag available.</p>';
+}
+?>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button class="green-button" onclick="addTag()">Add Tag</button>
@@ -697,7 +697,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 saveIcon.outerHTML =
                     `<i class="fas fa-pencil-alt edit-icon" title="Edit" onclick="enableRowEdit(this)"></i>`;
                 loadTableData(currentPage, rowsPerPage);
-                } else {
+            } else {
                 alert('แก้ไขข้อมูลไม่สำเร็จ!');
             }
         };
@@ -1062,6 +1062,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.querySelector('.user-close').innerText = `ปิดการใช้งาน : ${inactiveCount} คน`;
     }
 
+    function downloadExcel() {
+        const tableRows = document.querySelectorAll('.data-table tbody tr');
+        const data = [];
+        const selectedCategory = document.getElementById('category-dropdown').value;
+
+        tableRows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const rowData = [];
+            cells.forEach((cell, index) => {
+                if (index < cells.length - 1) {
+                    rowData.push(cell.innerText.trim());
+                }
+            });
+            data.push(rowData);
+        });
+
+        fetch('export.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tableData: data,
+                    selectedCategory: selectedCategory
+                }),
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'PhoneNumbers.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to download Excel.');
+            });
+    }
     </script>
 </body>
 
