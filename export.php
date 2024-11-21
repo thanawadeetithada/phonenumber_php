@@ -9,6 +9,7 @@ $postData = file_get_contents('php://input');
 $data = json_decode($postData, true);
 
 $selectedCategory = $data['selectedCategory'] ?? 'all';
+$search = $data['search'] ?? '';
 $tableData = $data['tableData'] ?? [];
 
 $spreadsheet = new Spreadsheet();
@@ -22,8 +23,15 @@ $sheet->setCellValue('E1', 'Tag');
 $sheet->setCellValue('F1', 'Status');
 
 $rowIndex = 2;
+
 foreach ($tableData as $row) {
-    if ($selectedCategory === 'all' || $row[2] === $selectedCategory) {
+    $phoneNumber = strtolower($row[0]);
+    $category = strtolower($row[2]);
+
+    $matchCategory = $selectedCategory === 'all' || $category === strtolower($selectedCategory);
+    $matchSearch = empty($search) || strpos($phoneNumber, $search) !== false;
+
+    if ($matchCategory && $matchSearch) {
         $sheet->setCellValue('A' . $rowIndex, $row[0]);
         $sheet->setCellValue('B' . $rowIndex, $row[1]);
         $sheet->setCellValue('C' . $rowIndex, $row[2]);
@@ -41,3 +49,4 @@ header('Cache-Control: max-age=0');
 $writer = new Xlsx($spreadsheet);
 $writer->save('php://output');
 exit;
+?>
