@@ -1,13 +1,13 @@
 ﻿# phonenumber_php
 
 SQL
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+phpMyAdmin SQL Dump
+version 5.2.1
+https://www.phpmyadmin.net/
+Server version: 10.4.32-MariaDB
+PHP Version: 8.2.12
 
--- Database: `phonenumber`
+#Database: `phonenumber`
 CREATE TABLE `phonenumber` (
   `id` int(11) NOT NULL,
   `phonenumber` varchar(20) NOT NULL,
